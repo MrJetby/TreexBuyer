@@ -2,7 +2,6 @@ package me.jetby.treexBuyer.storage;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public interface Storage {
 
@@ -14,9 +13,9 @@ public interface Storage {
 
     boolean playerExists(UUID uuid);
 
-    void setScore(UUID uuid, int score);
+    void setScore(UUID uuid, String key, int value);
 
-    int getScore(UUID uuid);
+    int getScore(UUID uuid, String key);
 
     void setAutoBuyItems(UUID uuid, List<String> items);
 

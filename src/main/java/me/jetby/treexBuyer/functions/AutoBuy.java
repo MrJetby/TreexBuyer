@@ -70,7 +70,7 @@ public class AutoBuy {
             if (!plugin.getItems().getItemValues().containsKey(itemStack.getType())) continue;
             Items.ItemData itemData = plugin.getItems().getItemValues().get(itemStack.getType());
 
-            double price = itemData.price() * plugin.getCoefficient().get(player);
+            double price = itemData.price() * plugin.getCoefficient().get(player, itemStack.getType());
             int score = itemData.score();
 
 
@@ -96,25 +96,31 @@ public class AutoBuy {
             totalPrice += price * itemStack.getAmount();
             totalScores += score * itemStack.getAmount();
 
+            if (totalScores > 0) {
+
+                String key = plugin.getCoefficient().determineKey(itemStack.getType());
+                plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) * totalScores);
+            }
         }
 
         if (totalPrice <= 0L) return;
         plugin.getEconomy().depositPlayer(player, totalPrice);
-        if (totalScores > 0)
-            plugin.getStorage().setScore(player.getUniqueId(), plugin.getStorage().getScore(player.getUniqueId()) + totalScores);
 
 
-        List<String> list = new ArrayList<>(plugin.getCfg().getAutoBuyActions());
-        double finalTotalPrice = totalPrice;
-        int finalTotalScores = totalScores;
-
-        list.replaceAll(s -> s.replace("%sell_pay%", df.format(finalTotalPrice)));
-        list.replaceAll(s -> s.replace("%sell_pay_commas%", NumberUtils.formatWithCommas(finalTotalPrice)));
-        list.replaceAll(s -> s.replace("%sell_score%", df.format(finalTotalScores)));
-        list.replaceAll(s -> s.replace("%sell_score_commas%", NumberUtils.formatWithCommas(finalTotalScores)));
+        List<String> list = getStrings(totalPrice, totalScores);
         ActionExecutor.execute(player, ActionRegistry.transform(list), null);
 
 
+    }
+
+    private @NotNull List<String> getStrings(double totalPrice, int totalScores) {
+        List<String> list = new ArrayList<>(plugin.getCfg().getAutoBuyActions());
+
+        list.replaceAll(s -> s.replace("%sell_pay%", df.format(totalPrice)));
+        list.replaceAll(s -> s.replace("%sell_pay_commas%", NumberUtils.formatWithCommas(totalPrice)));
+        list.replaceAll(s -> s.replace("%sell_score%", df.format(totalScores)));
+        list.replaceAll(s -> s.replace("%sell_score_commas%", NumberUtils.formatWithCommas(totalScores)));
+        return list;
     }
 
     public static boolean isRegularItem(@NotNull ItemStack item) {

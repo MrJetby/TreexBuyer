@@ -7,6 +7,7 @@ import me.jetby.treexBuyer.tools.TextUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class Config {
     String storageType;
     boolean yamlForceSave;
 
+    ScoreType type;
     int scores;
     double coefficient;
     int maxCoefficient;
@@ -59,11 +61,22 @@ public class Config {
         enable = TextUtil.colorize(configuration.getString("autobuy.status.enable", "&aВключён"));
         disable = TextUtil.colorize(configuration.getString("autobuy.status.disable", "&cВыключен"));
 
-        scores = configuration.getInt("score-to-multiplier-ratio.scores", 100);
-        coefficient = configuration.getDouble("score-to-multiplier-ratio.coefficient", 0.01);
-        maxCoefficient = configuration.getInt("max-legal-coefficient", 3);
-        defaultCoefficient = configuration.getInt("default-coefficient", 1);
-        boosters_except_legal_coefficient = configuration.getBoolean("boosters_except_legal_coefficient", false);
+        ConfigurationSection scoreSystem = configuration.getConfigurationSection("score-system");
+        if (scoreSystem==null) {
+            scoreSystem.set("type", "GLOBAL");
+            scoreSystem.set("multiplier-ratio.scores", 100);
+            scoreSystem.set("multiplier-ratio.coefficient", 0.01);
+            scoreSystem.set("max-legal-coefficient", 3);
+            scoreSystem.set("default-coefficient", 1);
+            scoreSystem.set("boosters_except_legal_coefficient", false);
+
+        }
+        type = ScoreType.valueOf(scoreSystem.getString("type", "GLOBAL").toUpperCase());
+        scores = scoreSystem.getInt("multiplier-ratio.scores", 100);
+        coefficient = scoreSystem.getDouble("multiplier-ratio.coefficient", 0.01);
+        maxCoefficient = scoreSystem.getInt("max-legal-coefficient", 3);
+        defaultCoefficient = scoreSystem.getInt("default-coefficient", 1);
+        boosters_except_legal_coefficient = scoreSystem.getBoolean("boosters_except_legal_coefficient", false);
 
         loadBoosts(configuration);
 
@@ -82,5 +95,7 @@ public class Config {
             }
         }
     }
-
+    public enum ScoreType {
+        GLOBAL, ITEM, CATEGORY
+    }
 }

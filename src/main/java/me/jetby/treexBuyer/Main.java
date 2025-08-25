@@ -28,16 +28,17 @@ import java.text.DecimalFormat;
 @Getter
 public final class Main extends JavaPlugin {
 
-    private final Loader menuLoader = new Loader(this, getDataFolder());
+    private Loader menuLoader;
     public static final NamespacedKey NAMESPACED_KEY = new NamespacedKey("treexbuyer", "item");
     private Economy economy;
     @Getter
     private static Main instance;
-    private Items items;
 
     @Setter
     private Storage storage;
+
     private Config cfg;
+    private Items items;
     private Coefficient coefficient;
     private AutoBuy autoBuy;
     private TreexBuyerPlaceholders treexBuyerPlaceholders;
@@ -59,6 +60,7 @@ public final class Main extends JavaPlugin {
 
         items = new Items();
         items.load();
+        menuLoader = new Loader(this, getDataFolder());
         menuLoader.load();
 
         autoBuy = new AutoBuy(this);

@@ -1,3 +1,23 @@
+
+
+# Категории:
+categories:
+  mine:
+    - NETHERITE_INGOT
+    - NETHERITE_SCRAP
+    - DIAMOND
+    - GOLD_INGOT
+    - IRON_INGOT
+    - REDSTONE
+    - LAPIS_LAZULI
+    - COAL
+    - QUARTZ
+  mob_drops:
+    - BONE
+    - LEATHER
+    - STRING
+    - SPIDER_EYE
+
 # Обычная стоимость предметов
 NETHERITE_INGOT:
   price: 10000

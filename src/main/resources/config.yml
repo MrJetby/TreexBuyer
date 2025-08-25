@@ -29,18 +29,26 @@ autobuy:
     enable: "&aВключён"
     disable: "&cВыключен"
 
-# за каждые 100 очков игрок будет получать +0.1 к коэффициенту
-score-to-multiplier-ratio:
-  scores: 100
-  coefficient: 0.01
 
-# максимальный коэффициент (без учёта донатных бустов)
-max-legal-coefficient: 3
-default-coefficient: 1
-# если true, донатные бусты будут обходить значение в max-legal-coefficient
-boosters_except_legal_coefficient: true
-booster:
-  donat-1: # имя (может быть любым)
-    permission: 'buyer.boost.donat1' # (пермишен по которому будет определяться наличие буста)
-    external-coefficient: 0.5
+score-system:
+  # Как будет расти Коэффициент
+  # GLOBAL - На все предметы сразу
+  # ITEM - Для каждого предмета свой
+  # CATEGORY - Для каждой категории свой
+  type: GLOBAL
+  multiplier-ratio:
+    scores: 100
+    coefficient: 0.01
+
+  # максимальный коэффициент (без учёта донатных бустов)
+  default-coefficient: 1
+  max-legal-coefficient: 3
+
+  # если true, донатные бусты будут обходить значение в max-legal-coefficient
+  boosters_except_legal_coefficient: true
+
+  booster:
+    donat-1: # имя (может быть любым)
+      permission: 'buyer.boost.donat1' # (пермишен по которому будет определяться наличие буста)
+      external-coefficient: 0.5
 

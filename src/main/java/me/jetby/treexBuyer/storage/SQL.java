@@ -6,9 +6,7 @@ import org.bukkit.Bukkit;
 
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class SQL implements Storage {
     private final Main plugin;
@@ -19,7 +17,9 @@ public class SQL implements Storage {
 
     private static final String CREATE_DATABASE = "CREATE TABLE IF NOT EXISTS players (uuid TEXT NOT NULL, score INTEGER DEFAULT 0, autoBuy BOOLEAN DEFAULT false, autoBuyItems TEXT DEFAULT '', PRIMARY KEY (uuid));";
     private static final String GET_ALL_PLAYERS = "SELECT * FROM players;";
+    private static final String GET_SCORES_FOR_UUID = "SELECT score_key, value FROM player_scores WHERE uuid = ?;";
     private static final String INSERT_PLAYER = "INSERT INTO players (uuid, score, autoBuy, autoBuyItems) VALUES (?, ?, ?, ?) ON CONFLICT(uuid) DO UPDATE SET score = ?, autoBuy = ?, autoBuyItems = ?;";
+    private static final String INSERT_SCORE = "INSERT INTO player_scores (uuid, score_key, value) VALUES (?, ?, ?) ON CONFLICT(uuid, score_key) DO UPDATE SET value = ?;";
     private static final String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
 
     private final String mysqlHost;
@@ -44,14 +44,14 @@ public class SQL implements Storage {
 
 
     private static class PlayerData {
-        int score = 0;
         boolean autoBuy = false;
         List<String> autoBuyItems = new ArrayList<>( );
+        Map<String, Integer> scores = new HashMap<>();
 
-        PlayerData(int score, boolean autoBuy, List<String> autoBuyItems) {
-            this.score = score;
+        PlayerData(boolean autoBuy, List<String> autoBuyItems, Map<String, Integer> scores) {
             this.autoBuy = autoBuy;
             this.autoBuyItems = new ArrayList<>(autoBuyItems);
+            this.scores = new HashMap<>(scores);
         }
 
         PlayerData() {
@@ -112,17 +112,29 @@ public class SQL implements Storage {
     private void loadCacheAsync() {
         Bukkit.getScheduler( ).runTaskAsynchronously(plugin, () -> {
             long start = System.currentTimeMillis( );
-            try (PreparedStatement ps = connection.prepareStatement(GET_ALL_PLAYERS);
-                 ResultSet rs = ps.executeQuery( )) {
-                while (rs.next( )) {
-                    UUID uuid = UUID.fromString(rs.getString("uuid"));
-                    int score = rs.getInt("score");
-                    boolean autoBuy = rs.getBoolean("autoBuy");
-                    String itemsStr = rs.getString("autoBuyItems");
+            try (PreparedStatement psPlayers = connection.prepareStatement(GET_ALL_PLAYERS);
+                 ResultSet rsPlayers = psPlayers.executeQuery( )) {
+                while (rsPlayers.next( )) {
+                    UUID uuid = UUID.fromString(rsPlayers.getString("uuid"));
+                    boolean autoBuy = rsPlayers.getBoolean("autoBuy");
+                    String itemsStr = rsPlayers.getString("autoBuyItems");
                     List<String> items = itemsStr == null || itemsStr.isEmpty( ) ? new ArrayList<>( ) : Arrays.asList(itemsStr.split(","));
-                    cache.put(uuid, new PlayerData(score, autoBuy, items));
+
+                    Map<String, Integer> scores = new HashMap<>();
+                    try (PreparedStatement psScores = connection.prepareStatement(GET_SCORES_FOR_UUID)) {
+                        psScores.setString(1, uuid.toString());
+                        try (ResultSet rsScores = psScores.executeQuery()) {
+                            while (rsScores.next()) {
+                                String scoreKey = rsScores.getString("score_key");
+                                int value = rsScores.getInt("value");
+                                scores.put(scoreKey, value);
+                            }
+                        }
+                    }
+
+                    cache.put(uuid, new PlayerData(autoBuy, items, scores));
                 }
-                Logger.success("Данные из storage.db были загружены за " + (System.currentTimeMillis( ) - start) + " мс");
+                Logger.success("Данные из БД были загружены за " + (System.currentTimeMillis( ) - start) + " мс");
             } catch (SQLException e) {
                 Logger.error("Ошибка загрузки кэша: " + e.getMessage( ));
             }
@@ -133,21 +145,30 @@ public class SQL implements Storage {
     public boolean save() {
         boolean status = false;
         try {
-            try (PreparedStatement ps = connection.prepareStatement(INSERT_PLAYER)) {
+            try (PreparedStatement psPlayer = connection.prepareStatement(INSERT_PLAYER);
+                 PreparedStatement psScore = connection.prepareStatement(INSERT_SCORE)) {
                 for (Map.Entry<UUID, PlayerData> entry : cache.entrySet( )) {
                     UUID uuid = entry.getKey( );
                     PlayerData data = entry.getValue( );
                     String itemsStr = String.join(",", data.autoBuyItems);
-                    ps.setString(1, uuid.toString( ));
-                    ps.setInt(2, data.score);
-                    ps.setBoolean(3, data.autoBuy);
-                    ps.setString(4, itemsStr);
-                    ps.setInt(5, data.score);
-                    ps.setBoolean(6, data.autoBuy);
-                    ps.setString(7, itemsStr);
-                    ps.addBatch( );
+
+                    psPlayer.setString(1, uuid.toString( ));
+                    psPlayer.setBoolean(2, data.autoBuy);
+                    psPlayer.setString(3, itemsStr);
+                    psPlayer.setBoolean(4, data.autoBuy);
+                    psPlayer.setString(5, itemsStr);
+                    psPlayer.addBatch( );
+
+                    for (Map.Entry<String, Integer> scoreEntry : data.scores.entrySet()) {
+                        psScore.setString(1, uuid.toString());
+                        psScore.setString(2, scoreEntry.getKey());
+                        psScore.setInt(3, scoreEntry.getValue());
+                        psScore.setInt(4, scoreEntry.getValue());
+                        psScore.addBatch();
+                    }
                 }
-                ps.executeBatch( );
+                psPlayer.executeBatch( );
+                psScore.executeBatch( );
             }
 
             connection.commit( );
@@ -178,16 +199,16 @@ public class SQL implements Storage {
     }
 
     @Override
-    public void setScore(UUID uuid, int score) {
+    public void setScore(UUID uuid, String key, int score) {
         PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData( ));
-        data.score = score;
+        data.scores.put(key.toLowerCase(), score);
         scheduleAsyncUpdate(uuid, data);
     }
 
     @Override
-    public int getScore(UUID uuid) {
+    public int getScore(UUID uuid, String key) {
         PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData( ));
-        return data.score;
+        return data.scores.getOrDefault(key.toLowerCase(), 0);
     }
 
     @Override
@@ -219,15 +240,26 @@ public class SQL implements Storage {
     private void scheduleAsyncUpdate(UUID uuid, PlayerData data) {
         Bukkit.getScheduler( ).runTaskAsynchronously(plugin, () -> {
             String itemsStr = String.join(",", data.autoBuyItems);
-            try (PreparedStatement ps = connection.prepareStatement(INSERT_PLAYER)) {
-                ps.setString(1, uuid.toString( ));
-                ps.setInt(2, data.score);
-                ps.setBoolean(3, data.autoBuy);
-                ps.setString(4, itemsStr);
-                ps.setInt(5, data.score);
-                ps.setBoolean(6, data.autoBuy);
-                ps.setString(7, itemsStr);
-                ps.executeUpdate( );
+            try {
+                try (PreparedStatement psPlayer = connection.prepareStatement(INSERT_PLAYER)) {
+                    psPlayer.setString(1, uuid.toString( ));
+                    psPlayer.setBoolean(2, data.autoBuy);
+                    psPlayer.setString(3, itemsStr);
+                    psPlayer.setBoolean(4, data.autoBuy);
+                    psPlayer.setString(5, itemsStr);
+                    psPlayer.executeUpdate( );
+                }
+
+                try (PreparedStatement psScore = connection.prepareStatement(INSERT_SCORE)) {
+                    for (Map.Entry<String, Integer> scoreEntry : data.scores.entrySet()) {
+                        psScore.setString(1, uuid.toString());
+                        psScore.setString(2, scoreEntry.getKey());
+                        psScore.setInt(3, scoreEntry.getValue());
+                        psScore.setInt(4, scoreEntry.getValue());
+                        psScore.addBatch();
+                    }
+                    psScore.executeBatch();
+                }
             } catch (SQLException e) {
                 Logger.error("Ошибка обновления игрока " + uuid + ": " + e.getMessage( ));
             }

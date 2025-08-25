@@ -74,9 +74,10 @@ public class JGui extends AdvancedGui implements Listener {
                 return Manager.check(plugin.getStorage().getAutoBuyStatus(offlinePlayer.getUniqueId()));
             return "";
         }));
+
         mainPlaceholders.register("%score%", (offlinePlayer) -> {
             if (offlinePlayer != null)
-                return String.valueOf(plugin.getStorage().getScore(offlinePlayer.getUniqueId()));
+                return String.valueOf(plugin.getStorage().getScore(offlinePlayer.getUniqueId(), "global"));
             return "";
         });
         // Placeholder end

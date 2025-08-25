@@ -156,7 +156,7 @@ public class JSON implements Storage {
     }
 
     @Override
-    public void setScore(UUID uuid, int score) {
+    public void setScore(UUID uuid, String key, int score) {
 //        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () ->{
 //            storage.setInt(uuid.toString() + ".score", score);
 //        });
@@ -165,7 +165,7 @@ public class JSON implements Storage {
     }
 
     @Override
-    public int getScore(UUID uuid) {
+    public int getScore(UUID uuid, String key) {
         final int[] score = {0};
 //        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () ->{
 //            score[0] = storage.getInt(uuid.toString() + ".score", 0);
