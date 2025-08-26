@@ -38,7 +38,7 @@ public record AutoBuyItemToggleAction(Main plugin) implements Action {
                 autoBuyItems.add(materialUpper);
             }
             plugin.getStorage().setAutoBuyItems(player.getUniqueId(), autoBuyItems);
-            Manager.refreshMenu(player, jGui);
+            Manager.refreshMenu(player, jGui, true);
         }
     }
 }

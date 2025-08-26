@@ -33,8 +33,8 @@ public class TreexBuyerPlaceholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
 
         return switch (identifier.toLowerCase()) {
-            case "score" -> String.valueOf(plugin.getStorage().getScore(player.getUniqueId()));
-            case "coefficient" -> String.valueOf(plugin.getCoefficient().get(player));
+            case "score" -> String.valueOf(plugin.getStorage().getScore(player.getUniqueId(), plugin.getCfg().getType().name()));
+            case "coefficient" -> String.valueOf(plugin.getCoefficient().get(player, null));
             default -> null;
         };
 

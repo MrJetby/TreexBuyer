@@ -3,6 +3,7 @@ package me.jetby.treexBuyer.menus.commands.impl;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.Button;
 import me.jetby.treexBuyer.menus.JGui;
+import me.jetby.treexBuyer.menus.Manager;
 import me.jetby.treexBuyer.menus.commands.Action;
 import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.GameMode;
@@ -48,17 +49,19 @@ public record ItemSellAction(Main plugin) implements Action {
         }
 
         double price = plugin.getItems().getItemValues().get(item).price() * amount;
-        price *= plugin.getCoefficient().get(player);
+        price *= plugin.getCoefficient().get(player, button.material());
 
         int score = plugin.getItems().getItemValues().get(item).score();
 
         plugin.getEconomy().depositPlayer(player, price);
-        plugin.getStorage().setScore(player.getUniqueId(), plugin.getStorage().getScore(player.getUniqueId()) + score);
+        plugin.getStorage().setScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.material()), plugin.getStorage().getScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.material())) + score);
 
         player.getInventory().removeItem(new ItemStack(item, amount));
 
         jGui.setTotalPrice(price);
         jGui.setTotalScores(score);
+
+        Manager.refreshMenu(player, jGui, false);
 
     }
 }

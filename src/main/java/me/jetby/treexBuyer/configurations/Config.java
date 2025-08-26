@@ -63,6 +63,7 @@ public class Config {
 
         ConfigurationSection scoreSystem = configuration.getConfigurationSection("score-system");
         if (scoreSystem==null) {
+            configuration.createSection("score-system");
             scoreSystem.set("type", "GLOBAL");
             scoreSystem.set("multiplier-ratio.scores", 100);
             scoreSystem.set("multiplier-ratio.coefficient", 0.01);

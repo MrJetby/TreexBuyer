@@ -62,13 +62,7 @@ public class JGui extends AdvancedGui implements Listener {
         // Placeholders start
         mainPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
         mainPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
-        mainPlaceholders.register("%coefficient%", (offlinePlayer) -> {
-            if (offlinePlayer != null) {
-                Player p = offlinePlayer.getPlayer();
-                if (p != null) return String.valueOf(plugin.getCoefficient().get(p));
-            }
-            return "";
-        });
+
         mainPlaceholders.register("%global_auto_sell_toggle_state%", (offlinePlayer -> {
             if (offlinePlayer != null)
                 return Manager.check(plugin.getStorage().getAutoBuyStatus(offlinePlayer.getUniqueId()));
@@ -87,7 +81,7 @@ public class JGui extends AdvancedGui implements Listener {
         onOpen(event -> {
             plugin.getMenuLoader().getJGui().put(player.getUniqueId(), this);
             inventory = event.getInventory();
-            Manager.refreshMenu(player, this);
+            Manager.refreshMenu(player, this, true);
         });
 
         setCancelEmptySlots(false);
@@ -138,7 +132,7 @@ public class JGui extends AdvancedGui implements Listener {
         if (clickedInv != null && clickedInv.equals(topInventory)) {
             if (!sellZoneSlots.contains(rawSlot)) {
                 if (click == ClickType.SHIFT_LEFT || click == ClickType.SHIFT_RIGHT) {
-                    Manager.refreshMenu(p, this);
+                    Manager.refreshMenu(p, this, true);
                 } else {
                     e.setCancelled(true);
                 }
@@ -152,7 +146,7 @@ public class JGui extends AdvancedGui implements Listener {
 
             ItemStack clicked = e.getCurrentItem();
             if (clicked == null || clicked.getType().isAir()) {
-                Manager.refreshMenu(p, this);
+                Manager.refreshMenu(p, this, true);
                 return;
             }
 
@@ -196,7 +190,7 @@ public class JGui extends AdvancedGui implements Listener {
                 e.setCurrentItem(null);
             }
 
-            Manager.refreshMenu(p, this);
+            Manager.refreshMenu(p, this, true);
             return;
         }
 
@@ -205,7 +199,7 @@ public class JGui extends AdvancedGui implements Listener {
             return;
         }
 
-        Manager.refreshMenu(p, this);
+        Manager.refreshMenu(p, this, true);
     }
 
     private void registerButtons() {
@@ -258,10 +252,12 @@ public class JGui extends AdvancedGui implements Listener {
                                 if (plugin.getItems().getItemValues().containsKey(button.material())) {
                                     double price = plugin.getItems().getItemValues().get(button.material()).price();
                                     list.replaceAll(s -> s.replace("%price%", df.format(price)));
-                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient().get(player))));
+                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient().get(player, button.material()))));
                                     list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(button.material().name()))));
+
                                 }
                                 ActionExecutor.execute(player, ActionRegistry.transform(list), button,
+                                        Placeholder.of("%coefficient%",() -> String.valueOf(plugin.getCoefficient().get(player, button.material()))),
                                         Placeholder.of("%sell_pay%", () -> df.format(totalPrice)),
                                         Placeholder.of("%sell_score%", () -> df.format(totalScores)));
                                 break;
@@ -305,8 +301,8 @@ public class JGui extends AdvancedGui implements Listener {
                             double price = plugin.getItems().getItemValues().get(materialType).price();
 
                             itemPlaceholders.register("%price%", (offlinePlayer) -> String.valueOf(price));
-                            itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> String.valueOf(price * plugin.getCoefficient().get(player)));
                             Material finalMaterialType = materialType;
+                            itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> String.valueOf(price * plugin.getCoefficient().get(player, finalMaterialType)));
                             itemPlaceholders.register("%auto_sell_toggle_state%", (offlinePlayer) -> Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(finalMaterialType.name())));
                             itemPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
                             itemPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));

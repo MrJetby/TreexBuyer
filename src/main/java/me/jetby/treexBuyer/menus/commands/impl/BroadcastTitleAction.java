@@ -25,7 +25,7 @@ public class BroadcastTitleAction implements Action {
             p.showTitle(Title.title(
                     SerializerType.LEGACY_AMPERSAND.deserialize(title),
                     SerializerType.LEGACY_AMPERSAND.deserialize(subTitle),
-                    Title.Times.times(Duration.ofMillis(fadeIn), Duration.ofMillis(stayIn), Duration.ofMillis(fadeOut))
+                    Title.Times.of(Duration.ofMillis(fadeIn), Duration.ofMillis(stayIn), Duration.ofMillis(fadeOut))
             ));
         }
     }

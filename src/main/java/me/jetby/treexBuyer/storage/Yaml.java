@@ -136,7 +136,7 @@ public class Yaml implements Storage {
             return 0;
         }
         Data data = cache.get(uuid);
-        return data.getScores().get(key);
+        return data.scores.getOrDefault(key.toLowerCase(), 0);
     }
 
     @Override

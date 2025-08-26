@@ -37,7 +37,7 @@ public record DisableALLAction(Main plugin) implements Action {
                 autoBuyItems.remove(itemStack.getType().name());
             }
             plugin.getStorage().setAutoBuyItems(player.getUniqueId(), autoBuyItems);
-            Manager.refreshMenu(player, jGui);
+            Manager.refreshMenu(player, jGui, false);
 
 
         }

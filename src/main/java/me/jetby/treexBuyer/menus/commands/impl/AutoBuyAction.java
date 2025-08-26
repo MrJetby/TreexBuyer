@@ -26,7 +26,7 @@ public class AutoBuyAction implements Action {
             JGui jGui = plugin.getMenuLoader().getJGui().get(player.getUniqueId());
 
             plugin.getStorage().setAutoBuyStatus(player.getUniqueId(), !plugin.getStorage().getAutoBuyStatus(player.getUniqueId()));
-            Manager.refreshMenu(player, jGui);
+            Manager.refreshMenu(player, jGui, true);
         }
 
     }

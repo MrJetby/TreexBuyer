@@ -26,12 +26,15 @@ public class Manager {
         return Main.getInstance().getCfg().getDisable();
     }
 
-    public void refreshMenu(Player player, JGui jGui) {
+    public void refreshMenu(Player player, JGui jGui, boolean resetPrice) {
 
         if (!player.getOpenInventory().getTopInventory().equals(jGui.getInventory())) return;
         jGui.runTask(() -> {
-            jGui.setTotalPrice(0.0);
-            jGui.setTotalScores(0);
+            if (resetPrice) {
+                jGui.setTotalPrice(0.0);
+                jGui.setTotalScores(0);
+            }
+
 
             for (int i : jGui.sellZoneSlots) {
 
@@ -45,7 +48,7 @@ public class Manager {
                 if (!jGui.plugin.getItems().getItemValues().containsKey(itemStack.getType())) continue;
                 Items.ItemData itemData = jGui.plugin.getItems().getItemValues().get(itemStack.getType());
 
-                double price = itemData.price() * jGui.plugin.getCoefficient().get(player);
+                double price = itemData.price() * jGui.plugin.getCoefficient().get(player, itemStack.getType());
                 int score = itemData.score();
 
 

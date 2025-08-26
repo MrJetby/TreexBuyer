@@ -38,7 +38,7 @@ public record EnableALLAction(Main plugin) implements Action {
                 autoBuyItems.add(itemStack.getType().name());
             }
             plugin.getStorage().setAutoBuyItems(player.getUniqueId(), autoBuyItems);
-            Manager.refreshMenu(player, jGui);
+            Manager.refreshMenu(player, jGui, true);
 
         }
 

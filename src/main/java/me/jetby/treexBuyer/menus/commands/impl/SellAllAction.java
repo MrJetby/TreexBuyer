@@ -44,7 +44,7 @@ public record SellAllAction(Main plugin) implements Action {
                 if (!plugin.getItems().getItemValues().containsKey(itemStack.getType())) continue;
                 Items.ItemData itemData = plugin.getItems().getItemValues().get(itemStack.getType());
 
-                double price = itemData.price() * plugin.getCoefficient().get(player);
+                double price = itemData.price() * plugin.getCoefficient().get(player, button.material());
                 int score = itemData.score();
 
                 inventory.setItem(i, null);
@@ -57,9 +57,9 @@ public record SellAllAction(Main plugin) implements Action {
                 plugin.getEconomy().depositPlayer(player, totalPrice);
             }
             if (totalScores > 0)
-                plugin.getStorage().setScore(player.getUniqueId(), plugin.getStorage().getScore(player.getUniqueId()) + totalScores);
+                plugin.getStorage().setScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.material()), plugin.getStorage().getScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.material())) + totalScores);
 
-            Manager.refreshMenu(player, jGui);
+            Manager.refreshMenu(player, jGui, true);
 
 
         }

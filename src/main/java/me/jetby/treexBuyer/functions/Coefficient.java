@@ -3,6 +3,7 @@ package me.jetby.treexBuyer.functions;
 import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.configurations.Config;
+import me.jetby.treexBuyer.configurations.Items;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -11,9 +12,6 @@ public class Coefficient {
 
     private final Main plugin;
 
-    public double get(Player player) {
-        return get(player, null);
-    }
     public double get(Player player, Material material) {
         String key = determineKey(material);
         double playerScore = plugin.getStorage().getScore(player.getUniqueId(), key);
@@ -36,12 +34,14 @@ public class Coefficient {
         }
     }
 
+    private final Items.ItemData defaultData = new Items.ItemData(0,0,"uncategorized");
+
     public String determineKey(Material material) {
         Config.ScoreType type = plugin.getCfg().getType();
         if (type == Config.ScoreType.GLOBAL) return "global";
         if (type == Config.ScoreType.ITEM) return material.name().toLowerCase();
         if (type == Config.ScoreType.CATEGORY) {
-            String category = plugin.getItems().getItemValues().get(material).category();
+            String category = plugin.getItems().getItemValues().getOrDefault(material, defaultData).category();
             return category != null ? category.toLowerCase() : "uncategorized";
         }
         throw new IllegalStateException("Unknown score type");

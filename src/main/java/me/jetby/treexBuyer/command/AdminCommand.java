@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -111,8 +112,14 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         }
 
         String playerName = args[2];
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
-        UUID uuid = offlinePlayer.getUniqueId();
+        UUID uuid;
+        Player player = Bukkit.getPlayer(playerName);
+        if (player==null) {
+            String string = "OfflinePlayer:" + playerName;
+            uuid = UUID.nameUUIDFromBytes(string.getBytes(StandardCharsets.UTF_8));
+        } else {
+            uuid = player.getUniqueId();
+        }
 
         String key;
         String amountStr;
