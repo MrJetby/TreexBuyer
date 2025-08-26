@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.jetby.treexBuyer.Main;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,6 +32,21 @@ public class TreexBuyerPlaceholders extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
+
+        if (identifier.startsWith("coefficient_category_".toLowerCase())) {
+            String string = identifier.replace("coefficient_category_", "");
+            return String.valueOf(plugin.getCoefficient().getByCategory(player, string));
+        }
+        if (identifier.startsWith("coefficient_score_".toLowerCase())) {
+            String string = identifier.replace("coefficient_score_", "").toUpperCase();
+            try {
+                Material material = Material.valueOf(string);
+                return String.valueOf(plugin.getStorage().getScore(player.getUniqueId(), material.name()));
+            } catch (IllegalArgumentException e) {
+                return "Material incorrect";
+            }
+        }
+
 
         return switch (identifier.toLowerCase()) {
             case "score" -> String.valueOf(plugin.getStorage().getScore(player.getUniqueId(), plugin.getCfg().getType().name()));

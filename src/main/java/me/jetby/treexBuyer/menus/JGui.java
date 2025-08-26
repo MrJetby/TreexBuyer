@@ -62,6 +62,7 @@ public class JGui extends AdvancedGui implements Listener {
         // Placeholders start
         mainPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
         mainPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
+        mainPlaceholders.register("%coefficient%", (offlinePlayer) ->  String.valueOf(plugin.getCoefficient().get(player, null)));
 
         mainPlaceholders.register("%global_auto_sell_toggle_state%", (offlinePlayer -> {
             if (offlinePlayer != null)
@@ -252,7 +253,7 @@ public class JGui extends AdvancedGui implements Listener {
                                 if (plugin.getItems().getItemValues().containsKey(button.material())) {
                                     double price = plugin.getItems().getItemValues().get(button.material()).price();
                                     list.replaceAll(s -> s.replace("%price%", df.format(price)));
-                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", String.valueOf(price * plugin.getCoefficient().get(player, button.material()))));
+                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", df.format(price * plugin.getCoefficient().get(player, button.material()))));
                                     list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(button.material().name()))));
 
                                 }
@@ -300,9 +301,9 @@ public class JGui extends AdvancedGui implements Listener {
 
                             double price = plugin.getItems().getItemValues().get(materialType).price();
 
-                            itemPlaceholders.register("%price%", (offlinePlayer) -> String.valueOf(price));
+                            itemPlaceholders.register("%price%", (offlinePlayer) -> df.format(price));
                             Material finalMaterialType = materialType;
-                            itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> String.valueOf(price * plugin.getCoefficient().get(player, finalMaterialType)));
+                            itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> df.format(price * plugin.getCoefficient().get(player, finalMaterialType)));
                             itemPlaceholders.register("%auto_sell_toggle_state%", (offlinePlayer) -> Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(finalMaterialType.name())));
                             itemPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
                             itemPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));

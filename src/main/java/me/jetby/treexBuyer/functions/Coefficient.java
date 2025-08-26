@@ -34,6 +34,31 @@ public class Coefficient {
         }
     }
 
+    public double getByCategory(Player player, String category) {
+        if (category == null || category.isEmpty()) {
+            return get(player, null);
+        }
+        Config.ScoreType type = plugin.getCfg().getType();
+        String key = type == Config.ScoreType.CATEGORY ? category.toLowerCase() : "global";
+        double playerScore = plugin.getStorage().getScore(player.getUniqueId(), key);
+        int multiplierCount = (int) (playerScore / plugin.getCfg().getScores());
+        double coefficient = plugin.getCfg().getDefaultCoefficient() + multiplierCount * plugin.getCfg().getCoefficient();
+        double baseCoefficient = Math.min(coefficient, plugin.getCfg().getMaxCoefficient());
+        baseCoefficient = Math.max(baseCoefficient, plugin.getCfg().getDefaultCoefficient());
+
+        double boosterCoefficient = 0.0;
+        for (Boost boost : plugin.getCfg().getBoosts().values()) {
+            if (boost.permission() != null && player.hasPermission(boost.permission())) {
+                boosterCoefficient += boost.coefficient();
+            }
+        }
+
+        if (plugin.getCfg().isBoosters_except_legal_coefficient()) {
+            return round(baseCoefficient + boosterCoefficient);
+        } else {
+            return round(Math.min(baseCoefficient + boosterCoefficient, plugin.getCfg().getMaxCoefficient()));
+        }
+    }
     private final Items.ItemData defaultData = new Items.ItemData(0,0,"uncategorized");
 
     public String determineKey(Material material) {

@@ -5,6 +5,7 @@ import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.menus.commands.ActionExecutor;
 import me.jetby.treexBuyer.menus.commands.ActionRegistry;
+import me.jetby.treexBuyer.tools.Logger;
 import me.jetby.treexBuyer.tools.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -98,7 +99,8 @@ public class AutoBuy {
 
             if (totalScores > 0) {
                 String key = plugin.getCoefficient().determineKey(itemStack.getType());
-                plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) * totalScores);
+                Logger.info(key );
+                plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) + totalScores);
             }
         }
 
