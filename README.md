@@ -1,29 +1,29 @@
 # TreexBuyer
 
-**TreexBuyer** - Современный плагин на создание скупщика для вашего сервера.
+**TreexBuyer** - Modern plugin for creating a buyer for your server.
 
 ![image](https://github.com/user-attachments/assets/dcaa8ba8-c6f3-4265-b624-6cb1ddf2ab68)
 
-## **Преимущества:**
+## **Advantages:**
 
-- **Неограниченное количество меню**
-- **Неограниченное количество скупщиков**
-- **Сдача предметов из инвентаря в меню**
-- **Сдача предметов кликом по предмету**
-- **Полная кастомизация**
-- **Авто-скупка**
-- **Система прокачки**
+- **Unlimited number of menus**
+- **Unlimited number of buyers**
+- **Handing in items from inventory to menu**
+- **Handing in items by clicking on the item**
+- **Full customization**
+- **Auto-buy**
+- **Leveling system**
 
 [![image](https://github.com/user-attachments/assets/fe789dba-1dbe-4b6d-88bc-a5b4c110a4ff)](https://mrjetbys-organization.gitbook.io/treexstudio/plugins/treexbuyer)
 
 
-## Нашли баг?
+## Found a bug?
 
-Нашли баг или хотите предложить идею?
-- Создайте [Issue на GitHub](https://github.com/MrJetby/TreexBuyer2/issues).
-- Или свяжитесь с нами в Discord: [TreexStudio](https://discord.gg/RcnDgRQVqY)
+Found a bug or want to suggest an idea?
+- Create an [Issue on GitHub](https://github.com/MrJetby/TreexBuyer2/issues).
+- Or contact us on Discord: [TreexStudio](https://discord.gg/RcnDgRQVqY)
 
-Спасибо за использование **TreexBuyer**!
+Thank you for using **TreexBuyer**!
 
 
 [![](https://bstats.org/signatures/bukkit/TreexBuyer.svg)](https://bstats.org/plugin/bukkit/TreexBuyer/25141)
