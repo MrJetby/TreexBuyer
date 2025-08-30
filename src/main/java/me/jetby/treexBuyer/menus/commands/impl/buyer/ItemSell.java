@@ -1,11 +1,10 @@
-package me.jetby.treexBuyer.menus.commands.impl;
+package me.jetby.treexBuyer.menus.commands.impl.buyer;
 
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.Button;
 import me.jetby.treexBuyer.menus.JGui;
 import me.jetby.treexBuyer.menus.Manager;
 import me.jetby.treexBuyer.menus.commands.Action;
-import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -13,11 +12,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static me.jetby.treexBuyer.Main.df;
 import static me.jetby.treexBuyer.functions.AutoBuy.isRegularItem;
 
 
-public record ItemSellAction(Main plugin) implements Action {
+public record ItemSell(Main plugin) implements Action {
 
     @Override
     public void execute(@Nullable Player player, @NotNull String context, Button button) {
@@ -31,7 +29,7 @@ public record ItemSellAction(Main plugin) implements Action {
         Material item;
         int amount;
         try {
-            item = button.material();
+            item = button.itemStack().getType();
             try {
                 amount = Integer.parseInt(context);
             } catch (NumberFormatException e) {
@@ -49,12 +47,12 @@ public record ItemSellAction(Main plugin) implements Action {
         }
 
         double price = plugin.getItems().getItemValues().get(item).price() * amount;
-        price *= plugin.getCoefficient().get(player, button.material());
+        price *= plugin.getCoefficient().get(player, button.itemStack().getType());
 
         int score = plugin.getItems().getItemValues().get(item).score();
 
         plugin.getEconomy().depositPlayer(player, price);
-        plugin.getStorage().setScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.material()), plugin.getStorage().getScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.material())) + score);
+        plugin.getStorage().setScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.itemStack().getType()), plugin.getStorage().getScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.itemStack().getType())) + score);
 
         player.getInventory().removeItem(new ItemStack(item, amount));
 

@@ -10,12 +10,12 @@ import org.bukkit.entity.Player;
 @RequiredArgsConstructor
 public class Coefficient {
 
-    private final Main plugin;
+    final Main plugin;
 
     public double get(Player player, Material material) {
         String key = determineKey(material);
         double playerScore = plugin.getStorage().getScore(player.getUniqueId(), key);
-        int multiplierCount = (int) (playerScore / plugin.getCfg().getScores());
+        double multiplierCount = (playerScore / plugin.getCfg().getScores());
         double coefficient = plugin.getCfg().getDefaultCoefficient() + multiplierCount * plugin.getCfg().getCoefficient();
         double baseCoefficient = Math.min(coefficient, plugin.getCfg().getMaxCoefficient());
         baseCoefficient = Math.max(baseCoefficient, plugin.getCfg().getDefaultCoefficient());
@@ -41,7 +41,7 @@ public class Coefficient {
         Config.ScoreType type = plugin.getCfg().getType();
         String key = type == Config.ScoreType.CATEGORY ? category.toLowerCase() : "global";
         double playerScore = plugin.getStorage().getScore(player.getUniqueId(), key);
-        int multiplierCount = (int) (playerScore / plugin.getCfg().getScores());
+        double multiplierCount = (playerScore / plugin.getCfg().getScores());
         double coefficient = plugin.getCfg().getDefaultCoefficient() + multiplierCount * plugin.getCfg().getCoefficient();
         double baseCoefficient = Math.min(coefficient, plugin.getCfg().getMaxCoefficient());
         baseCoefficient = Math.max(baseCoefficient, plugin.getCfg().getDefaultCoefficient());
@@ -59,7 +59,7 @@ public class Coefficient {
             return round(Math.min(baseCoefficient + boosterCoefficient, plugin.getCfg().getMaxCoefficient()));
         }
     }
-    private final Items.ItemData defaultData = new Items.ItemData(0,0,"uncategorized");
+    final Items.ItemData defaultData = new Items.ItemData(0,0,"uncategorized");
 
     public String determineKey(Material material) {
         Config.ScoreType type = plugin.getCfg().getType();
@@ -72,7 +72,7 @@ public class Coefficient {
         throw new IllegalStateException("Unknown score type");
     }
 
-    private double round(double value) {
+    double round(double value) {
         double scale = Math.pow(10, 2);
         return Math.round(value * scale) / scale;
     }

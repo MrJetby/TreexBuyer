@@ -31,8 +31,11 @@ public final class Main extends JavaPlugin {
     private Loader menuLoader;
     public static final NamespacedKey NAMESPACED_KEY = new NamespacedKey("treexbuyer", "item");
     private Economy economy;
-    @Getter
-    private static Main instance;
+
+    private static Main INSTANCE;
+    public static Main getInstance() {
+        return INSTANCE;
+    }
 
     @Setter
     private Storage storage;
@@ -47,7 +50,10 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        instance = this;
+        Logger.success("------------------------");
+        Logger.success("");
+        Logger.success("Enabling TreexBuyer...");
+        INSTANCE = this;
 
         JGuiInitializer.init(this);
 
@@ -69,24 +75,19 @@ public final class Main extends JavaPlugin {
         coefficient = new Coefficient(this);
 
 
-        if (!setupEconomy()) {
-            Logger.error("Vault with economy plugin not found! Disabling plugin.");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") == null) {
-            Logger.warn("PlaceholderAPI not found. Placeholders are not being working");
-        } else {
-            treexBuyerPlaceholders = new TreexBuyerPlaceholders(this);
-            treexBuyerPlaceholders.register();
-        }
+        if (!setupEconomy()) return;
+        setupPlaceholders();
 
         CommandRegistrar.createCommands(this);
 
         PluginCommand treexbuyer = getCommand("treexbuyer");
         if (treexbuyer != null)
             treexbuyer.setExecutor(new AdminCommand(this));
+
+        Logger.success("");
+        Logger.success("Plugin was successfully enabled, enjoy it :)");
+
+        Logger.success("------------------------");
     }
 
     public void loadStorage() {
@@ -95,7 +96,7 @@ public final class Main extends JavaPlugin {
                 storage = new SQL(this);
                 break;
             case "JSON":
-                storage = new JSON();
+                storage = new JSON(this);
                 break;
             default:
                 storage = new Yaml(this);
@@ -103,13 +104,27 @@ public final class Main extends JavaPlugin {
         storage.load();
     }
 
+    private boolean setupPlaceholders() {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") == null) {
+            Logger.warn("PlaceholderAPI not found. Placeholders are not being working");
+            return false;
+        } else {
+            treexBuyerPlaceholders = new TreexBuyerPlaceholders(this);
+            treexBuyerPlaceholders.register();
+        }
+        return true;
+    }
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            Logger.error("Vault was not found! Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
             return false;
         }
 
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
+            Logger.error("Vault economy plugin was not found! Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
             return false;
         }
 

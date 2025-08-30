@@ -1,4 +1,4 @@
-package me.jetby.treexBuyer.menus.commands.impl;
+package me.jetby.treexBuyer.menus.commands.impl.buyer;
 
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.configurations.Items;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import static me.jetby.treexBuyer.Main.NAMESPACED_KEY;
 import static me.jetby.treexBuyer.functions.AutoBuy.isRegularItem;
 
-public record SellAllAction(Main plugin) implements Action {
+public record SellAll(Main plugin) implements Action {
 
     @Override
     public void execute(@Nullable Player player, @NotNull String context, Button button) {
@@ -44,7 +44,7 @@ public record SellAllAction(Main plugin) implements Action {
                 if (!plugin.getItems().getItemValues().containsKey(itemStack.getType())) continue;
                 Items.ItemData itemData = plugin.getItems().getItemValues().get(itemStack.getType());
 
-                double price = itemData.price() * plugin.getCoefficient().get(player, button.material());
+                double price = itemData.price() * plugin.getCoefficient().get(player, button.itemStack().getType());
                 int score = itemData.score();
 
                 inventory.setItem(i, null);
@@ -57,7 +57,7 @@ public record SellAllAction(Main plugin) implements Action {
                 plugin.getEconomy().depositPlayer(player, totalPrice);
             }
             if (totalScores > 0)
-                plugin.getStorage().setScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.material()), plugin.getStorage().getScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.material())) + totalScores);
+                plugin.getStorage().setScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.itemStack().getType()), plugin.getStorage().getScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.itemStack().getType())) + totalScores);
 
             Manager.refreshMenu(player, jGui, true);
 

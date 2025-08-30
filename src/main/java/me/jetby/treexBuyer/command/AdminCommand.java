@@ -135,7 +135,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             try {
                 Material.valueOf(key.toUpperCase());
             } catch (IllegalArgumentException e) {
-                sender.sendMessage(TextUtil.colorize("&#EF473AInvalid material key: " + key));
+                sender.sendMessage(TextUtil.colorize("&#EF473AInvalid itemStack key: " + key));
                 return;
             }
         } else if (scoreType == Config.ScoreType.CATEGORY) {

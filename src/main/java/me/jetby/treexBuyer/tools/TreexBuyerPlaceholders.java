@@ -3,13 +3,9 @@ package me.jetby.treexBuyer.tools;
 import lombok.RequiredArgsConstructor;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.jetby.treexBuyer.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 public class TreexBuyerPlaceholders extends PlaceholderExpansion {
@@ -45,6 +41,19 @@ public class TreexBuyerPlaceholders extends PlaceholderExpansion {
             } catch (IllegalArgumentException e) {
                 return "Material incorrect";
             }
+        }
+
+        if (identifier.startsWith("top_") && identifier.endsWith("_name")) {
+            int number = Integer.parseInt(identifier
+                    .replace("top_", "")
+                    .replace("_name", ""));
+            return plugin.getStorage().getTopName(number);
+        }
+        if (identifier.startsWith("top_") && identifier.endsWith("_score")) {
+            int number = Integer.parseInt(identifier
+                    .replace("top_", "")
+                    .replace("_score", ""));
+            return String.valueOf(plugin.getStorage().getTopScore(number));
         }
 
 

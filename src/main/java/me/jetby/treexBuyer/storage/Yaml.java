@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.tools.FileLoader;
 import me.jetby.treexBuyer.tools.Logger;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -12,7 +15,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class Yaml implements Storage {
     final Main plugin;
-    final Map<UUID, Data> cache = new HashMap<>( );
+    final Map<UUID, PlayerData> cache = new HashMap<>( );
     final FileConfiguration configuration = FileLoader.getFileConfiguration("storage.yml");
 
     @Override
@@ -24,29 +27,21 @@ public class Yaml implements Storage {
         try {
             for (String key : configuration.getKeys(false)) {
                 UUID uuid = UUID.fromString(key);
-                Data data = new Data();
-                data.setUuid(uuid);
 
                 ConfigurationSection scoresSection = configuration.getConfigurationSection(key + ".scores");
+
+                boolean autoBuy = configuration.getBoolean(key + ".autoBuy", false);
+                List<String> items = configuration.getStringList(key + ".autoBuyItems");
                 Map<String, Integer> scores = new HashMap<>();
+
                 if (scoresSection != null) {
                     for (String scoreKey : scoresSection.getKeys(false)) {
                         scores.put(scoreKey, scoresSection.getInt(scoreKey));
                     }
-                } else {
-                    int oldScore = configuration.getInt(key + ".score", 0);
-                    if (oldScore > 0) {
-                        scores.put("global", oldScore);
-                        Logger.warn("Миграция: Перенесён старый score=" + oldScore + " для UUID=" + uuid + " в scores.global");
-                    }
                 }
-                data.setScores(scores);
-
-                data.setAutoBuy(configuration.getBoolean(key + ".autoBuy", false));
-                data.setAutoBuyItems(configuration.getStringList(key + ".autoBuyItems"));
-                cache.put(uuid, data);
+                cache.put(uuid, new PlayerData(autoBuy, items, scores));
             }
-            Logger.success("Данные из storage.yml были загружены за " + (System.currentTimeMillis() - start) + " мс");
+            Logger.success("PlayerData from storage.yml was loaded in " + (System.currentTimeMillis() - start) + " ms");
             status = true;
 
         } catch (Exception e) {
@@ -66,21 +61,21 @@ public class Yaml implements Storage {
                 configuration.set(key, null);
             }
 
-            for (Map.Entry<UUID, Data> entry : cache.entrySet()) {
-                Data data = entry.getValue();
-                String key = data.getUuid().toString();
+            for (Map.Entry<UUID, PlayerData> entry : cache.entrySet()) {
+                UUID uuid = entry.getKey();
+                PlayerData data = entry.getValue();
 
-                ConfigurationSection scoresSection = configuration.createSection(key + ".scores");
-                for (Map.Entry<String, Integer> scoreEntry : data.getScores().entrySet()) {
+                ConfigurationSection scoresSection = configuration.createSection(uuid + ".scores");
+                for (Map.Entry<String, Integer> scoreEntry : data.scores.entrySet()) {
                     scoresSection.set(scoreEntry.getKey(), scoreEntry.getValue());
                 }
 
-                configuration.set(key + ".autoBuy", data.isAutoBuy());
-                configuration.set(key + ".autoBuyItems", data.getAutoBuyItems());
+                configuration.set(uuid + ".autoBuy", data.autoBuy);
+                configuration.set(uuid + ".autoBuyItems", data.autoBuyItems);
             }
 
             configuration.save(FileLoader.getFile("storage.yml"));
-            Logger.success("Данные в storage.yml были сохранены за " + (System.currentTimeMillis() - start) + " мс");
+            Logger.success("PlayerData from storage.yml was loaded in " + (System.currentTimeMillis() - start) + " ms");
             status = true;
 
         } catch (Exception e) {
@@ -97,130 +92,111 @@ public class Yaml implements Storage {
 
     @Override
     public boolean playerExists(UUID uuid) {
-        Data data = cache.get(uuid);
+        PlayerData data = cache.get(uuid);
         return data != null;
     }
 
     @Override
     public void setScore(UUID uuid, String key, int score) {
-        if (playerExists(uuid)) {
-            Data data = cache.get(uuid);
-            data.getScores().put(key, score);
-        } else {
-            Data data = new Data( );
-            data.setUuid(uuid);
-            data.getScores().put(key, score);
-            data.setAutoBuy(false);
-            data.setAutoBuyItems(List.of( ));
-            cache.put(uuid, data);
-        }
-        if (plugin.getCfg( ).isYamlForceSave( )) {
-            if (!save( )) Logger.error("Failed to save score for UUID: " + uuid);
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+            data.scores.put(key.toLowerCase(), score);
+            if (plugin.getCfg().isYamlOrJsonForceSave()) {
+                if (!save()) {
+                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
+                }
+            }
+        });
 
     }
 
     @Override
     public int getScore(UUID uuid, String key) {
-        if (!playerExists(uuid)) {
-            Data data = new Data( );
-            data.setUuid(uuid);
-            data.getScores().put(key, 0);
-            data.setAutoBuy(false);
-            data.setAutoBuyItems(List.of( ));
-            cache.put(uuid, data);
-            if (plugin.getCfg( ).isYamlForceSave( )) {
-                if (!save( )) Logger.error("Failed to save score for UUID: " + uuid);
-            }
-
-            return 0;
-        }
-        Data data = cache.get(uuid);
+        PlayerData data = cache.getOrDefault(uuid, new PlayerData());
         return data.scores.getOrDefault(key.toLowerCase(), 0);
     }
 
     @Override
     public void setAutoBuyItems(UUID uuid, List<String> items) {
-        if (!playerExists(uuid)) {
-            Data data = new Data( );
-            data.setUuid(uuid);
-            data.setAutoBuy(false);
-            data.setAutoBuyItems(new ArrayList<>(items));
-            cache.put(uuid, data);
-            if (plugin.getCfg( ).isYamlForceSave( )) {
-                if (!save( )) Logger.error("Failed to save score for UUID: " + uuid);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+            data.autoBuyItems = new ArrayList<>(items);
+            if (plugin.getCfg().isYamlOrJsonForceSave()) {
+                if (!save()) {
+                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
+                }
             }
 
-            return;
-        }
-        Data data = cache.get(uuid);
-        data.setAutoBuyItems(items);
-        if (plugin.getCfg( ).isYamlForceSave( )) {
-            if (!save( )) Logger.error("Failed to save score for UUID: " + uuid);
-        }
+        });
 
     }
 
     @Override
     public List<String> getAutoBuyItems(UUID uuid) {
-        if (!playerExists(uuid)) {
-            Data data = new Data( );
-            data.setUuid(uuid);
-            data.setAutoBuy(false);
-            data.setAutoBuyItems(new ArrayList<>( ));
-            cache.put(uuid, data);
-            if (plugin.getCfg( ).isYamlForceSave( )) {
-                if (!save( )) Logger.error("Failed to save score for UUID: " + uuid);
-            }
-
-            return List.of( );
-        }
-        Data data = cache.get(uuid);
-        return data.getAutoBuyItems( );
+        PlayerData data = cache.getOrDefault(uuid, new PlayerData());
+        return new ArrayList<>(data.autoBuyItems);
     }
 
     @Override
     public void setAutoBuyStatus(UUID uuid, boolean status) {
-        if (!playerExists(uuid)) {
-            Data data = new Data( );
-            data.setUuid(uuid);
-            data.setAutoBuy(status);
-            data.setAutoBuyItems(new ArrayList<>( ));
-            cache.put(uuid, data);
-            if (plugin.getCfg( ).isYamlForceSave( )) {
-                if (!save( )) Logger.error("Failed to save score for UUID: " + uuid);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+            data.autoBuy = status;
+            if (plugin.getCfg().isYamlOrJsonForceSave()) {
+                if (!save()) {
+                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
+                }
             }
-
-            return;
-        }
-        Data data = cache.get(uuid);
-        data.setAutoBuy(status);
-        if (plugin.getCfg( ).isYamlForceSave( )) {
-            if (!save( )) Logger.error("Failed to save score for UUID: " + uuid);
-        }
+        });
 
     }
 
     @Override
     public boolean getAutoBuyStatus(UUID uuid) {
-        if (!playerExists(uuid)) {
-            Data data = new Data( );
-            data.setUuid(uuid);
-            data.setAutoBuy(false);
-            data.setAutoBuyItems(new ArrayList<>( ));
-            cache.put(uuid, data);
-            return false;
-        }
-        Data data = cache.get(uuid);
-        return data.isAutoBuy( );
+        PlayerData data = cache.getOrDefault(uuid, new PlayerData());
+        return data.autoBuy;
+    }
+    @Override
+    public String getTopName(int number) {
+        if (cache.isEmpty()) return null;
+
+        List<Map.Entry<UUID, PlayerData>> sorted = cache.entrySet().stream()
+                .sorted((a, b) -> {
+                    int sumA = a.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    int sumB = b.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    return Integer.compare(sumB, sumA);
+                })
+                .toList();
+
+        if (number <= 0 || number > sorted.size()) return null;
+        return getName(sorted.get(number - 1).getKey());
     }
 
-    @lombok.Data
-    public static class Data {
-        UUID uuid;
-        boolean autoBuy;
-        List<String> autoBuyItems;
-        Map<String, Integer> scores = new HashMap<>();
+    @Override
+    public int getTopScore(int number) {
+        if (cache.isEmpty()) return 0;
+
+        List<Map.Entry<UUID, PlayerData>> sorted = cache.entrySet().stream()
+                .sorted((a, b) -> {
+                    int sumA = a.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    int sumB = b.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    return Integer.compare(sumB, sumA);
+                })
+                .toList( );
+
+        if (number <= 0 || number > sorted.size()) return 0;
+
+        return sorted.get(number - 1).getValue()
+                .scores
+                .values()
+                .stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
+    private String getName(UUID uuid) {
+        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+        return player != null ? player.getName() : null;
     }
 }
 

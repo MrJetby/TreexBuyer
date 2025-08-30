@@ -1,16 +1,15 @@
-package me.jetby.treexBuyer.menus.commands.impl;
+package me.jetby.treexBuyer.menus.commands.impl.standard;
 
 import com.jodexindustries.jguiwrapper.api.text.SerializerType;
 import me.jetby.treexBuyer.menus.Button;
 import me.jetby.treexBuyer.menus.commands.Action;
-import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 
-public class TitleAction implements Action {
+public class Title implements Action {
     @Override
     public void execute(@Nullable Player player, @NotNull String context, Button button) {
         if (player == null) return;
@@ -22,10 +21,10 @@ public class TitleAction implements Action {
         int stayIn = (args.length > 3 ? Integer.parseInt(args[3]) : 70) * 50;
         int fadeOut = (args.length > 4 ? Integer.parseInt(args[4]) : 20) * 50;
 
-        player.showTitle(Title.title(
+        player.showTitle(net.kyori.adventure.title.Title.title(
                 SerializerType.LEGACY_AMPERSAND.deserialize(title),
                 SerializerType.LEGACY_AMPERSAND.deserialize(subTitle),
-                Title.Times.of(Duration.ofMillis(fadeIn), Duration.ofMillis(stayIn), Duration.ofMillis(fadeOut))
+                net.kyori.adventure.title.Title.Times.of(Duration.ofMillis(fadeIn), Duration.ofMillis(stayIn), Duration.ofMillis(fadeOut))
         ));
     }
 }

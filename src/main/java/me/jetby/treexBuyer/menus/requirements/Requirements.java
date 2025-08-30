@@ -18,68 +18,78 @@ import static me.jetby.treexBuyer.functions.AutoBuy.isRegularItem;
 @UtilityClass
 public class Requirements {
 
-    public boolean check(Player player,
-                         ClickRequirement clickRequirement, double totalPrice, int totalScore, Button button) {
+    public boolean check(Player player, ViewRequirement req, double totalPrice, int totalScore, Button button) {
+        return checkInternal(player, req.type(), req.permission(), req.input(), req.output(),
+                totalPrice, totalScore, button);
+    }
 
+    public boolean check(Player player, ClickRequirement req, double totalPrice, int totalScore, Button button) {
+        return checkInternal(player, req.type(), req.permission(), req.input(), req.output(),
+                totalPrice, totalScore, button);
+    }
 
-        if (clickRequirement.type().equalsIgnoreCase("has permission")) {
-            return player.hasPermission(clickRequirement.permission());
+    private boolean checkInternal(Player player,
+                                  String type,
+                                  String permission,
+                                  String input,
+                                  String output,
+                                  double totalPrice,
+                                  int totalScore,
+                                  Button button) {
+
+        switch (type.toLowerCase()) {
+            case "has permission":
+                return player.hasPermission(permission);
+            case "!has permission":
+                return !player.hasPermission(permission);
+            case "string equals":
+                return input.equalsIgnoreCase(output);
+            case "!string equals":
+                return !input.equalsIgnoreCase(output);
+            case "javascript":
+                return evalJavascriptLike(player, input, totalPrice, totalScore, button);
+            default:
+                return false;
         }
-        if (clickRequirement.type().equalsIgnoreCase("!has permission")) {
-            return !player.hasPermission(clickRequirement.permission());
+    }
+
+    private boolean evalJavascriptLike(Player player, String input, double totalPrice, int totalScore, Button button) {
+        String[] args = input.split(" ");
+        if (args.length < 3) return false;
+
+        args[0] = setPlaceholders(player, args[0], totalPrice, totalScore, button);
+        args[2] = setPlaceholders(player, args[2], totalPrice, totalScore, button);
+
+        try {
+            double x = Double.parseDouble(args[0]);
+            double x1 = Double.parseDouble(args[2]);
+            return switch (args[1]) {
+                case ">" -> x > x1;
+                case ">=" -> x >= x1;
+                case "==" -> x == x1;
+                case "!=" -> x != x1;
+                case "<=" -> x <= x1;
+                case "<" -> x < x1;
+                default -> false;
+            };
+        } catch (NumberFormatException e) {
+            return switch (args[1]) {
+                case "==" -> args[0].equals(args[2]);
+                case "!=" -> !args[0].equals(args[2]);
+                default -> false;
+            };
         }
-        if (clickRequirement.type().equalsIgnoreCase("string equals")) {
-            return clickRequirement.input().equalsIgnoreCase(clickRequirement.output());
-        }
-        if (clickRequirement.type().equalsIgnoreCase("!string equals")) {
-            return !clickRequirement.input().equalsIgnoreCase(clickRequirement.output());
-        } else if (clickRequirement.type().equalsIgnoreCase("javascript")) {
-            String[] args = clickRequirement.input().split(" ");
-            if (args.length < 3) return false;
-
-            args[0] = setPlaceholders(player, args[0], totalPrice, totalScore, button);
-            args[2] = setPlaceholders(player, args[2], totalPrice, totalScore, button);
-
-
-            try {
-                double x = Double.parseDouble(args[0]);
-                double x1 = Double.parseDouble(args[2]);
-
-                return switch (args[1]) {
-                    case ">" -> x > x1;
-                    case ">=" -> x >= x1;
-                    case "==" -> x == x1;
-                    case "!=" -> x != x1;
-                    case "<=" -> x <= x1;
-                    case "<" -> x < x1;
-                    default -> false;
-                };
-            } catch (NumberFormatException e) {
-                try {
-                    String x = args[0];
-                    String x1 = args[2];
-                    return switch (args[1]) {
-                        case "==" -> x.equals(x1);
-                        case "!=" -> !x.equals(x1);
-                        default -> false;
-                    };
-                } catch (Exception ex) {
-                    return false;
-                }
-            }
-        }
-        return false;
     }
 
     private static String items(Player player, Button button) {
         int amount = 0;
         try {
-            Material item = button.material();
-            for (ItemStack itemStack : player.getInventory().getContents()) {
-                if (itemStack == null) continue;
-                if (itemStack.getType() != item) continue;
-                if (!isRegularItem(itemStack)) continue;
-                amount += itemStack.getAmount();
+            Material item = button.itemStack().getType();
+            for (ItemStack stack : player.getInventory().getContents()) {
+                if (stack == null) continue;
+                if (stack.getType() != item) continue;
+                if (!isRegularItem(stack)) continue;
+                amount += stack.getAmount();
             }
         } catch (Exception e) {
             amount = 0;
@@ -87,18 +97,17 @@ public class Requirements {
         return String.valueOf(amount);
     }
 
-    public static void runDenyCommands(Player player, List<String> denyCommands, double totalPrice,
-                                       int totalScore, Button button) {
+    public static void runDenyCommands(Player player, List<String> denyCommands,
+                                       double totalPrice, int totalScore, Button button) {
         List<String> commands = new ArrayList<>();
-        for (String string : denyCommands) {
-            commands.add(setPlaceholders(player, string, totalPrice, totalScore, button));
+        for (String str : denyCommands) {
+            commands.add(setPlaceholders(player, str, totalPrice, totalScore, button));
         }
         ActionExecutor.execute(player, ActionRegistry.transform(commands), button);
     }
 
     private String setPlaceholders(Player player, String string,
-                                   double totalPrice,
-                                   int totalScore, Button button) {
+                                   double totalPrice, int totalScore, Button button) {
         return TextUtil.setPapi(player, string
                 .replace("%sell_pay%", df.format(totalPrice))
                 .replace("%sell_score%", df.format(totalScore))

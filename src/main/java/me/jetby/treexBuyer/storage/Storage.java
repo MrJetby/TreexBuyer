@@ -25,4 +25,7 @@ public interface Storage {
 
     boolean getAutoBuyStatus(UUID uuid);
 
+    String getTopName(int number);
+
+    int getTopScore(int number);
 }

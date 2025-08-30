@@ -27,7 +27,7 @@ public class Items {
                     try {
                         materials.add(Material.valueOf(name));
                     } catch (IllegalArgumentException e) {
-                        System.err.println("Invalid material in category " + category + ": " + name);
+                        System.err.println("Invalid itemStack in category " + category + ": " + name);
                     }
                 }
                 categories.put(category.toLowerCase(), materials);
@@ -44,7 +44,7 @@ public class Items {
                 String category = getCategory(material);
                 itemValues.put(material, new ItemData(price, addScores, category != null ? category : "none"));
             } catch (IllegalArgumentException e) {
-                System.err.println("Invalid material in prices.yml: " + key);
+                System.err.println("Invalid itemStack in prices.yml: " + key);
             }
         }
     }

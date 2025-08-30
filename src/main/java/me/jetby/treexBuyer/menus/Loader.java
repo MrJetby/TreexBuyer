@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.commands.Command;
 import me.jetby.treexBuyer.menus.requirements.ClickRequirement;
+import me.jetby.treexBuyer.menus.requirements.ViewRequirement;
 import me.jetby.treexBuyer.tools.Logger;
 import me.jetby.treexBuyer.tools.TextUtil;
 import org.bukkit.Bukkit;
@@ -14,6 +15,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.util.*;
@@ -29,11 +31,15 @@ public class Loader {
     private final Main plugin;
     private final File file;
 
+    int amount = 0;
+
     public void load() {
 
 
         File folder = new File(file, "Menu");
 
+
+        Logger.success("------------------------");
         if (!folder.exists() && folder.mkdirs()) {
             String[] defaults = {"mine.yml", "mobs.yml", "seller.yml"};
 
@@ -42,7 +48,7 @@ public class Loader {
 
                 if (!target.exists()) {
                     plugin.saveResource("Menu/" + name, false);
-                    Logger.info("Меню Menu/" + name + " создана");
+                    Logger.info("The Menu/" + name + " created");
                 }
 
                 FileConfiguration config = YamlConfiguration.loadConfiguration(target);
@@ -56,27 +62,35 @@ public class Loader {
                 if (!file.getName().endsWith(".yml")) continue;
                 FileConfiguration config = YamlConfiguration.loadConfiguration(file);
                 loadMenu(config.getString("id", file.getName().replace(".yml", "")), file);
-                Logger.info("Меню Menu/" + config.getString("id") + ".yml загружена");
+                Logger.info(file.getName()+" (id: "+config.getString("id")+")" + " loaded");
             }
         }
+        Logger.success("------------------------");
+        Logger.success(amount+" menus has been founded");
+        Logger.success("------------------------");
     }
 
     private void loadMenu(String menuId, File file) {
 
+        if (menus.containsKey(menuId)) {
+            Logger.error("A duplicate of "+menuId+" was found");
+            return;
+        }
         try {
             FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-            String title = config.getString("title");
-            String type = config.getString("type", "default");
+            String title = TextUtil.colorize(config.getString("title"));
+            InventoryType type = InventoryType.valueOf(config.getString("type", "CHEST"));
             int size = config.getInt("size", 27);
             String permission = config.getString("open_permission");
             InventoryType inventoryType = InventoryType.valueOf(config.getString("inventory", "CHEST"));
             List<String> openCommands = config.getStringList("open_commands");
             List<Button> buttons = loadButtons(config);
 
+            amount++;
             menus.put(menuId, new Menu(menuId, title, type, size, inventoryType, permission, openCommands, buttons));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Logger.error("Error trying to load menu: "+e.getMessage());
         }
     }
 
@@ -88,10 +102,11 @@ public class Loader {
                 ConfigurationSection itemSection = itemsSection.getConfigurationSection(key);
                 if (itemSection != null) {
                     String displayName = itemSection.getString("display_name");
-                    List<String> lore = itemSection.getStringList("lore");
+                    if (displayName!=null) displayName = TextUtil.colorize(displayName);
+                    List<String> lore = TextUtil.colorize(itemSection.getStringList("lore"));
                     List<Integer> slots = parseSlots(itemSection.get("slot"));
                     int amount = itemSection.getInt("amount", 1);
-                    int customModelData = itemSection.getInt("customModelData", 0);
+                    int customModelData = itemSection.getInt("custom-model-data", 0);
                     boolean enchanted = itemSection.getBoolean("enchanted", false);
                     boolean sellZone = itemSection.getBoolean("sell-zone", false);
                     String defaultMaterial;
@@ -100,9 +115,25 @@ public class Loader {
                     } else {
                         defaultMaterial = "STONE";
                     }
-                    Material material = Material.valueOf(TextUtil.setPapi(null, itemSection.getString("material", defaultMaterial)));
+                    String material = TextUtil.setPapi(null, itemSection.getString("material", defaultMaterial));
+                    ItemStack itemStack;
+                    if (material.startsWith("basehead-")) {
+                        try {
+                            itemStack = SkullCreator.itemFromBase64(material.replace("basehead-", ""));
+                        } catch (Exception e) {
+                            Bukkit.getLogger().warning("Error creating custom skull: " + e.getMessage());
+                            itemStack = new ItemStack(SkullCreator.createSkull());
+                        }
+                    } else {
+                        itemStack = new ItemStack(Material.valueOf(material));
+                    }
+
+                    itemStack.setAmount(amount);
+
                     for (Integer slot : slots) {
-                        buttons.add(new Button(key, displayName, lore, slot, amount, customModelData, enchanted, sellZone, material, loadCommands(itemSection)));
+                        buttons.add(new Button(key, displayName, lore, slot, amount, customModelData, enchanted, sellZone, itemStack,
+                                requirements(itemSection),
+                                loadCommands(itemSection)));
                     }
                 }
             }
@@ -115,40 +146,56 @@ public class Loader {
 
         if (itemSection.contains("left_click_commands")) {
 
-            commands.add(new Command(false, ClickType.LEFT, itemSection.getStringList("left_click_commands"),
+            commands.add(new Command(false, ClickType.LEFT, TextUtil.colorize(itemSection.getStringList("left_click_commands")),
                     requirements(itemSection, "left_click_requirements", ClickType.LEFT, false)));
 
         }
         if (itemSection.contains("right_click_commands")) {
-            commands.add(new Command(false, ClickType.RIGHT, itemSection.getStringList("right_click_commands"),
+            commands.add(new Command(false, ClickType.RIGHT, TextUtil.colorize(itemSection.getStringList("right_click_commands")),
                     requirements(itemSection, "right_click_requirements", ClickType.RIGHT, false)));
 
         }
         if (itemSection.contains("shift_left_click_commands")) {
 
-            commands.add(new Command(false, ClickType.SHIFT_LEFT, itemSection.getStringList("shift_left_click_commands"),
+            commands.add(new Command(false, ClickType.SHIFT_LEFT, TextUtil.colorize(itemSection.getStringList("shift_left_click_commands")),
                     requirements(itemSection, "shift_left_click_requirements", ClickType.SHIFT_LEFT, false)));
 
         }
         if (itemSection.contains("shift_right_click_commands")) {
-            commands.add(new Command(false, ClickType.SHIFT_RIGHT, itemSection.getStringList("shift_right_click_commands"),
+            commands.add(new Command(false, ClickType.SHIFT_RIGHT, TextUtil.colorize(itemSection.getStringList("shift_right_click_commands")),
                     requirements(itemSection, "shift_right_click_requirements", ClickType.SHIFT_RIGHT, false)));
 
         }
         if (itemSection.contains("click_commands")) {
-            commands.add(new Command(true, ClickType.UNKNOWN, itemSection.getStringList("click_commands"),
+            commands.add(new Command(true, ClickType.UNKNOWN, TextUtil.colorize(itemSection.getStringList("click_commands")),
                     requirements(itemSection, "click_requirements", ClickType.UNKNOWN, true)));
 
         }
         if (itemSection.contains("drop_commands")) {
-            commands.add(new Command(false, ClickType.DROP, itemSection.getStringList("drop_commands"),
+            commands.add(new Command(false, ClickType.DROP, TextUtil.colorize(itemSection.getStringList("drop_commands")),
                     requirements(itemSection, "drop_requirements", ClickType.DROP, false)));
         }
 
         return commands;
     }
 
-
+    private List<ViewRequirement> requirements(ConfigurationSection itemSection) {
+        List<ViewRequirement> requirements = new ArrayList<>( );
+        ConfigurationSection requirementsSection = itemSection.getConfigurationSection("view_requirements");
+        if (requirementsSection == null) {
+            return requirements;
+        }
+        for (String key : requirementsSection.getKeys(false)) {
+            ConfigurationSection section = requirementsSection.getConfigurationSection(key);
+            if (section == null) continue;
+            requirements.add(new ViewRequirement(
+                    section.getString("type"),
+                    section.getString("input"),
+                    section.getString("output"),
+                    section.getString("permission")));
+        }
+        return requirements;
+    }
     private List<ClickRequirement> requirements(ConfigurationSection itemSection, String name, ClickType clickType, boolean anyClick) {
         List<ClickRequirement> requirements = new ArrayList<>();
         ConfigurationSection requirementsSection = itemSection.getConfigurationSection(name);
@@ -163,7 +210,7 @@ public class Loader {
                     section.getString("input"),
                     section.getString("output"),
                     section.getString("permission"),
-                    section.getStringList("deny_commands")));
+                    TextUtil.colorize(section.getStringList("deny_commands"))));
         }
         return requirements;
     }
@@ -185,7 +232,7 @@ public class Loader {
                 }
             }
         } else {
-            Bukkit.getLogger().warning("Неизвестный формат слотов: " + slotObject);
+            Bukkit.getLogger().warning("Unknown slot format: " + slotObject);
         }
 
         return slots;
@@ -202,13 +249,13 @@ public class Loader {
                     slots.add(i);
                 }
             } catch (NumberFormatException e) {
-                Bukkit.getLogger().warning("Ошибка парсинга диапазона слотов: " + slotString);
+                Bukkit.getLogger().warning("Error parsing slot range: " + slotString);
             }
         } else {
             try {
                 slots.add(Integer.parseInt(slotString));
             } catch (NumberFormatException e) {
-                Bukkit.getLogger().warning("Ошибка парсинга одиночного слота: " + slotString);
+                Bukkit.getLogger().warning("Error parsing single slot: " + slotString);
             }
         }
         return slots;

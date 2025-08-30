@@ -19,7 +19,7 @@ public class ActionExecutor {
                 for (Placeholder placeholder : placeholders) {
                     context = placeholder.replace(context);
                 }
-                var c = TextUtil.setPapi(player, TextUtil.colorize(context));
+                var c = TextUtil.setPapi(player, context);
                 type.getAction().execute(player, c, button);
             }
         });

@@ -3,6 +3,7 @@ package me.jetby.treexBuyer.storage;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 import java.sql.*;
 import java.util.*;
@@ -15,10 +16,11 @@ public class SQL implements Storage {
     private final Connection connection;
     private final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>( );
 
-    private static final String CREATE_DATABASE = "CREATE TABLE IF NOT EXISTS players (uuid TEXT NOT NULL, score INTEGER DEFAULT 0, autoBuy BOOLEAN DEFAULT false, autoBuyItems TEXT DEFAULT '', PRIMARY KEY (uuid));";
+    private static final String CREATE_PLAYERS_TABLE = "CREATE TABLE IF NOT EXISTS players (uuid TEXT NOT NULL, autoBuy BOOLEAN DEFAULT false, autoBuyItems TEXT DEFAULT '', PRIMARY KEY (uuid));";
+    private static final String CREATE_SCORES_TABLE = "CREATE TABLE IF NOT EXISTS player_scores (uuid TEXT NOT NULL, score_key TEXT NOT NULL, value INTEGER DEFAULT 0, PRIMARY KEY (uuid, score_key));";
     private static final String GET_ALL_PLAYERS = "SELECT * FROM players;";
     private static final String GET_SCORES_FOR_UUID = "SELECT score_key, value FROM player_scores WHERE uuid = ?;";
-    private static final String INSERT_PLAYER = "INSERT INTO players (uuid, score, autoBuy, autoBuyItems) VALUES (?, ?, ?, ?) ON CONFLICT(uuid) DO UPDATE SET score = ?, autoBuy = ?, autoBuyItems = ?;";
+    private static final String INSERT_PLAYER = "INSERT INTO players (uuid, autoBuy, autoBuyItems) VALUES (?, ?, ?) ON CONFLICT(uuid) DO UPDATE SET autoBuy = ?, autoBuyItems = ?;";
     private static final String INSERT_SCORE = "INSERT INTO player_scores (uuid, score_key, value) VALUES (?, ?, ?) ON CONFLICT(uuid, score_key) DO UPDATE SET value = ?;";
     private static final String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
 
@@ -41,23 +43,6 @@ public class SQL implements Storage {
 
         this.connection = connect();
     }
-
-
-    private static class PlayerData {
-        boolean autoBuy = false;
-        List<String> autoBuyItems = new ArrayList<>( );
-        Map<String, Integer> scores = new HashMap<>();
-
-        PlayerData(boolean autoBuy, List<String> autoBuyItems, Map<String, Integer> scores) {
-            this.autoBuy = autoBuy;
-            this.autoBuyItems = new ArrayList<>(autoBuyItems);
-            this.scores = new HashMap<>(scores);
-        }
-
-        PlayerData() {
-        }
-    }
-
 
     public void closeConnection() {
         try {
@@ -102,10 +87,11 @@ public class SQL implements Storage {
 
     private void createTables() {
         try (Statement statement = connection.createStatement( )) {
-            statement.execute(CREATE_DATABASE);
-            Logger.success("Таблица игроков успешно создана или уже существует.");
+            statement.execute(CREATE_PLAYERS_TABLE);
+            statement.execute(CREATE_SCORES_TABLE);
+            Logger.success("Players and scores tables were created successfully or already exist.");
         } catch (SQLException e) {
-            Logger.error("Ошибка при создании таблицы игроков: " + e.getMessage( ));
+            Logger.error("Error creating tables: " + e.getMessage( ));
         }
     }
 
@@ -134,9 +120,9 @@ public class SQL implements Storage {
 
                     cache.put(uuid, new PlayerData(autoBuy, items, scores));
                 }
-                Logger.success("Данные из БД были загружены за " + (System.currentTimeMillis( ) - start) + " мс");
+                Logger.success("Data from the database was loaded in " + (System.currentTimeMillis( ) - start) + " ms");
             } catch (SQLException e) {
-                Logger.error("Ошибка загрузки кэша: " + e.getMessage( ));
+                Logger.error("Error loading cache: " + e.getMessage( ));
             }
         });
     }
@@ -173,13 +159,13 @@ public class SQL implements Storage {
 
             connection.commit( );
             status = true;
-            Logger.success("Кэш сохранён в БД.");
+            Logger.success("Cache saved to DB.");
         } catch (SQLException e) {
-            Logger.error("Ошибка сохранения кэша: " + e.getMessage( ));
+            Logger.error("Error saving cache: " + e.getMessage( ));
             try {
                 connection.rollback( );
             } catch (SQLException ex) {
-                Logger.error("Ошибка отката транзакции: " + ex.getMessage( ));
+                Logger.error("Transaction rollback error: " + ex.getMessage( ));
             }
         }
 
@@ -261,8 +247,34 @@ public class SQL implements Storage {
                     psScore.executeBatch();
                 }
             } catch (SQLException e) {
-                Logger.error("Ошибка обновления игрока " + uuid + ": " + e.getMessage( ));
+                Logger.error("Error updating player " + uuid + ": " + e.getMessage( ));
             }
         });
+    }
+
+    @Override
+    public String getTopName(int number) {
+        if (cache.isEmpty()) return null;
+
+        List<Map.Entry<UUID, PlayerData>> sorted = cache.entrySet().stream()
+                .sorted((a, b) -> {
+                    int sumA = a.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    int sumB = b.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    return Integer.compare(sumB, sumA);
+                })
+                .toList();
+
+        if (number <= 0 || number > sorted.size()) return null;
+        return getName(sorted.get(number - 1).getKey());
+    }
+
+    @Override
+    public int getTopScore(int number) {
+        return 0;
+    }
+
+    private String getName(UUID uuid) {
+        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+        return player != null ? player.getName() : null;
     }
 }

@@ -26,7 +26,7 @@ public class CommandRegistrar extends BukkitCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Команда доступна только игрокам.");
+            sender.sendMessage("The command is available only to players.");
             return true;
         }
         new JGui(plugin.getMenuLoader().getMenus().get(menuId), plugin, player).open(player);

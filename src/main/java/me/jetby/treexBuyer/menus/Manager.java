@@ -7,8 +7,10 @@ import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.functions.AutoBuy;
 import me.jetby.treexBuyer.menus.commands.Command;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -67,6 +69,7 @@ public class Manager {
                     }
 
                     ItemMeta itemMeta = itemStack.getItemMeta();
+                    itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                     itemMeta.setDisplayName(button.displayName());
                     itemMeta.setLore(button.lore());
 
@@ -88,14 +91,12 @@ public class Manager {
                             if (!itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem"))
                                 continue;
 
-                            wrapper.enchanted(jGui.plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(wrapper.itemStack().getType().name()));
-
+                            if (jGui.plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(wrapper.itemStack().getType().name())) itemMeta.addEnchant(Enchantment.KNOCKBACK, 0, false);
                             break;
                         }
 
                     }
                     itemStack.setItemMeta(itemMeta);
-                    wrapper.itemStack(itemStack);
                     wrapper.update((HumanEntity) player);
                 });
             }

@@ -1,4 +1,4 @@
-package me.jetby.treexBuyer.menus.commands.impl;
+package me.jetby.treexBuyer.menus.commands.impl.standard;
 
 import com.jodexindustries.jguiwrapper.api.text.SerializerType;
 import me.jetby.treexBuyer.menus.Button;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 
-public class BroadcastTitleAction implements Action {
+public class BroadcastTitle implements Action {
     @Override
     public void execute(@Nullable Player player, @NotNull String context, Button button) {
         var args = context.split(";");

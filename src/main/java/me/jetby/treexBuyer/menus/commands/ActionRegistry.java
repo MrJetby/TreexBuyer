@@ -29,7 +29,7 @@ public class ActionRegistry {
             }
             var context = matcher.group(2).trim();
             actions.putIfAbsent(type, new ArrayList<>());
-            actions.get(type).add(TextUtil.colorize(context));
+            actions.get(type).add(context);
         });
         return actions;
     }

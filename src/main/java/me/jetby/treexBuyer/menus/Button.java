@@ -1,7 +1,8 @@
 package me.jetby.treexBuyer.menus;
 
 import me.jetby.treexBuyer.menus.commands.Command;
-import org.bukkit.Material;
+import me.jetby.treexBuyer.menus.requirements.ViewRequirement;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
@@ -15,7 +16,8 @@ public record Button(
         int customModelData,
         boolean enchanted,
         boolean sellZone,
-        Material material,
+        ItemStack itemStack,
+        List<ViewRequirement> viewRequirements,
         List<Command> commands
 
 ) {

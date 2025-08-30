@@ -4,141 +4,120 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.tools.FileLoader;
+import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class JSON implements Storage {
+    private final Main plugin;
 
-
-    final File jsonFile = FileLoader.getFile("storage.json");
-
+    private final File jsonFile = FileLoader.getFile("storage.json");
     private JSONObject json;
-    private JSONParser parser = new JSONParser();
-    private HashMap<String, Object> defaults = new HashMap<String, Object>();
+    private final JSONParser parser = new JSONParser();
+    private final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>();
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean load() {
-
-
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
-            try {
-                PrintWriter pw = new PrintWriter(jsonFile, "UTF-8");
-                pw.print("{");
-                pw.print("}");
-                pw.flush();
-                pw.close();
-                json = (JSONObject) parser.parse(new InputStreamReader(new FileInputStream(jsonFile), "UTF-8"));
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-        });
-
-        defaults.put("MyString", "Some String");
-
-        defaults.put("MyNumber", 1337);
-
-        JSONObject myObject = new JSONObject();
-        myObject.put("Test", "test");
-        myObject.put("Test2", "test2");
-        defaults.put("MyObject", myObject);
-
-        JSONArray myArray = new JSONArray();
-        myArray.add("Value1");
-        myArray.add("Value2");
-        defaults.put("MyArray", myArray);
-        return true;
+    public JSON(Main plugin) {
+        this.plugin = plugin;
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+    public boolean load() {
+        boolean status = false;
+        try {
+            if (!jsonFile.exists()) {
+                jsonFile.getParentFile().mkdirs();
+                PrintWriter pw = new PrintWriter(jsonFile, "UTF-8");
+                pw.print("{}");
+                pw.flush();
+                pw.close();
+            }
+
+            json = (JSONObject) parser.parse(new InputStreamReader(new FileInputStream(jsonFile), "UTF-8"));
+            cache.clear();
+
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                long start = System.currentTimeMillis();
+                try {
+                    for (Object key : json.keySet()) {
+                        String uuidStr = (String) key;
+                        UUID uuid = UUID.fromString(uuidStr);
+                        JSONObject playerData = (JSONObject) json.get(uuidStr);
+
+                        Map<String, Integer> scores = new HashMap<>();
+                        JSONObject scoresObj = (JSONObject) playerData.getOrDefault("scores", new JSONObject());
+                        for (Object scoreKey : scoresObj.keySet()) {
+                            String k = (String) scoreKey;
+                            Number value = (Number) scoresObj.get(k);
+                            scores.put(k, value.intValue());
+                        }
+
+                        boolean autoBuy = (Boolean) playerData.getOrDefault("autoBuy", false);
+                        JSONArray itemsArray = (JSONArray) playerData.getOrDefault("autoBuyItems", new JSONArray());
+                        List<String> autoBuyItems = new ArrayList<>();
+                        for (Object item : itemsArray) {
+                            autoBuyItems.add((String) item);
+                        }
+
+                        cache.put(uuid, new PlayerData(autoBuy, autoBuyItems, scores));
+                    }
+                    Logger.success("Data from storage.json was loaded in " + (System.currentTimeMillis() - start) + " ms");
+                } catch (Exception ex) {
+                    Logger.error("Error loading JSON:" + ex.getMessage());
+                }
+            });
+            status = true;
+        } catch (Exception ex) {
+            Logger.error("Error initializing JSON file: " + ex.getMessage());
+        }
+        return status;
+    }
+
     @Override
     public boolean save() {
-//        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), storage::save);
-
+        boolean status = false;
         try {
             JSONObject toSave = new JSONObject();
 
-            for (String s : defaults.keySet()) {
-                Object o = defaults.get(s);
-                if (o instanceof String) {
-                    toSave.put(s, getString(s));
-                } else if (o instanceof Double) {
-                    toSave.put(s, getDouble(s));
-                } else if (o instanceof Integer) {
-                    toSave.put(s, getInteger(s));
-                } else if (o instanceof JSONObject) {
-                    toSave.put(s, getObject(s));
-                } else if (o instanceof JSONArray) {
-                    toSave.put(s, getArray(s));
+            for (Map.Entry<UUID, PlayerData> entry : cache.entrySet()) {
+                UUID uuid = entry.getKey();
+                PlayerData data = entry.getValue();
+                JSONObject playerData = new JSONObject();
+
+                JSONObject scoresObj = new JSONObject();
+                for (Map.Entry<String, Integer> scoreEntry : data.scores.entrySet()) {
+                    scoresObj.put(scoreEntry.getKey(), scoreEntry.getValue());
                 }
+                playerData.put("scores", scoresObj);
+
+                playerData.put("autoBuy", data.autoBuy);
+                JSONArray itemsArray = new JSONArray();
+                itemsArray.addAll(data.autoBuyItems);
+                playerData.put("autoBuyItems", itemsArray);
+
+                toSave.put(uuid.toString(), playerData);
             }
 
-            TreeMap<String, Object> treeMap = new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
-            treeMap.putAll(toSave);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String prettyJsonString = gson.toJson(toSave);
 
-            Gson g = new GsonBuilder().setPrettyPrinting().create();
-            String prettyJsonString = g.toJson(treeMap);
+            try (FileWriter fw = new FileWriter(jsonFile)) {
+                fw.write(prettyJsonString);
+                fw.flush();
+            }
 
-            FileWriter fw = new FileWriter(jsonFile);
-            fw.write(prettyJsonString);
-            fw.flush();
-            fw.close();
-
-            return true;
+            Logger.success("Data is stored in storage.json");
+            status = true;
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
+            Logger.error("Error when saving JSON: " + ex.getMessage());
         }
-    }
-
-    public String getRawData(String key) {
-        return json.containsKey(key) ? json.get(key).toString()
-                : (defaults.containsKey(key) ? defaults.get(key).toString() : key);
-    }
-
-    public String getString(String key) {
-        return ChatColor.translateAlternateColorCodes('&', getRawData(key));
-    }
-
-    public boolean getBoolean(String key) {
-        return Boolean.valueOf(getRawData(key));
-    }
-
-    public double getDouble(String key) {
-        try {
-            return Double.parseDouble(getRawData(key));
-        } catch (Exception ex) {
-        }
-        return -1;
-    }
-
-    public double getInteger(String key) {
-        try {
-            return Integer.parseInt(getRawData(key));
-        } catch (Exception ex) {
-        }
-        return -1;
-    }
-
-    public JSONObject getObject(String key) {
-        return json.containsKey(key) ? (JSONObject) json.get(key)
-                : (defaults.containsKey(key) ? (JSONObject) defaults.get(key) : new JSONObject());
-    }
-
-    public JSONArray getArray(String key) {
-        return json.containsKey(key) ? (JSONArray) json.get(key)
-                : (defaults.containsKey(key) ? (JSONArray) defaults.get(key) : new JSONArray());
+        return status;
     }
 
     @Override
@@ -148,65 +127,110 @@ public class JSON implements Storage {
 
     @Override
     public boolean playerExists(UUID uuid) {
-        boolean[] status = {false};
-//        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () ->{
-//            status[0] = storage.has(uuid.toString() + ".score");
-//        });
-        return status[0];
+        return cache.containsKey(uuid);
     }
 
     @Override
     public void setScore(UUID uuid, String key, int score) {
-//        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () ->{
-//            storage.setInt(uuid.toString() + ".score", score);
-//        });
-
-
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+            data.scores.put(key.toLowerCase(), score);
+            if (plugin.getCfg().isYamlOrJsonForceSave()) {
+                if (!save()) {
+                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
+                }
+            }
+        });
     }
 
     @Override
     public int getScore(UUID uuid, String key) {
-        final int[] score = {0};
-//        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () ->{
-//            score[0] = storage.getInt(uuid.toString() + ".score", 0);
-//        });
-        return score[0];
+        PlayerData data = cache.getOrDefault(uuid, new PlayerData());
+        return data.scores.getOrDefault(key.toLowerCase(), 0);
     }
 
     @Override
     public void setAutoBuyItems(UUID uuid, List<String> items) {
-//        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () -> {
-//            storage.setStringList(uuid.toString() + ".autoBuyItems", items);
-//        });
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+            data.autoBuyItems = new ArrayList<>(items);
+            if (plugin.getCfg().isYamlOrJsonForceSave()) {
+                if (!save()) {
+                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
+                }
+            }
+
+        });
     }
 
     @Override
     public List<String> getAutoBuyItems(UUID uuid) {
-        final List<String>[] items = new List[]{List.of()};
-//        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () -> {
-//            if (storage.has(String.valueOf(uuid))) {
-//                items[0] = storage.getStringList(uuid.toString() + ".autoBuyItems");
-//            }
-//        });
-        return items[0];
+        PlayerData data = cache.getOrDefault(uuid, new PlayerData());
+        return new ArrayList<>(data.autoBuyItems);
     }
 
     @Override
     public void setAutoBuyStatus(UUID uuid, boolean status) {
-//        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () -> {
-//            storage.setBoolean(uuid.toString() + ".autoBuyStatus", status);
-//        });
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
+            data.autoBuy = status;
+            if (plugin.getCfg().isYamlOrJsonForceSave()) {
+                if (!save()) {
+                    Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
+                }
+            }
+        });
     }
 
     @Override
     public boolean getAutoBuyStatus(UUID uuid) {
-        final boolean[] status = {false};
-//        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance( ), () -> {
-//            if (storage.has(String.valueOf(uuid))) {
-//                status[0] = storage.getBoolean(uuid.toString() + ".autoBuyStatus", false);
-//            }
-//        });
-        return status[0];
+        PlayerData data = cache.getOrDefault(uuid, new PlayerData());
+        return data.autoBuy;
     }
+    @Override
+    public String getTopName(int number) {
+        if (cache.isEmpty()) return null;
+
+        List<Map.Entry<UUID, PlayerData>> sorted = cache.entrySet().stream()
+                .sorted((a, b) -> {
+                    int sumA = a.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    int sumB = b.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    return Integer.compare(sumB, sumA);
+                })
+                .toList();
+
+        if (number <= 0 || number > sorted.size()) return null;
+        return getName(sorted.get(number - 1).getKey());
+    }
+
+    @Override
+    public int getTopScore(int number) {
+        if (cache.isEmpty()) return 0;
+
+        List<Map.Entry<UUID, PlayerData>> sorted = cache.entrySet().stream()
+                .sorted((a, b) -> {
+                    int sumA = a.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    int sumB = b.getValue().scores.values().stream().mapToInt(Integer::intValue).sum();
+                    return Integer.compare(sumB, sumA);
+                })
+                .toList( );
+
+        if (number <= 0 || number > sorted.size()) return 0;
+
+        return sorted.get(number - 1).getValue()
+                .scores
+                .values()
+                .stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
+    private String getName(UUID uuid) {
+        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+        return player != null ? player.getName() : null;
+    }
+
 
 }

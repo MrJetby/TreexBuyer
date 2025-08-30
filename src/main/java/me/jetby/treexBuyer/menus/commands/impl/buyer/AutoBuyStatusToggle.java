@@ -1,4 +1,4 @@
-package me.jetby.treexBuyer.menus.commands.impl;
+package me.jetby.treexBuyer.menus.commands.impl.buyer;
 
 import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 @RequiredArgsConstructor
-public class AutoBuyAction implements Action {
+public class AutoBuyStatusToggle implements Action {
 
     private final Main plugin;
 

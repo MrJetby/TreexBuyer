@@ -2,6 +2,7 @@ package me.jetby.treexBuyer.menus;
 
 import com.jodexindustries.jguiwrapper.api.item.ItemWrapper;
 import com.jodexindustries.jguiwrapper.api.placeholder.PlaceholderEngine;
+import com.jodexindustries.jguiwrapper.api.text.SerializerType;
 import com.jodexindustries.jguiwrapper.gui.advanced.AdvancedGui;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,9 +12,12 @@ import me.jetby.treexBuyer.menus.commands.ActionRegistry;
 import me.jetby.treexBuyer.menus.commands.Command;
 import me.jetby.treexBuyer.menus.requirements.Requirements;
 import me.jetby.treexBuyer.menus.requirements.ClickRequirement;
+import me.jetby.treexBuyer.menus.requirements.ViewRequirement;
+import me.jetby.treexBuyer.tools.NumberUtils;
 import me.jetby.treexBuyer.tools.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -51,8 +55,11 @@ public class JGui extends AdvancedGui implements Listener {
     final List<Integer> sellZoneSlots = new ArrayList<>();
     final Main plugin;
 
+
     public JGui(Menu menu, Main plugin, Player player) {
         super(menu.size(), menu.title());
+
+        type(menu.type());
 
         this.menu = menu;
         this.player = player;
@@ -60,8 +67,10 @@ public class JGui extends AdvancedGui implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
 
         // Placeholders start
-        mainPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
+        mainPlaceholders.register("%sell_pay%",(offlinePlayer) ->  df.format(totalPrice));
+        mainPlaceholders.register("%sell_pay_commas%", (offlinePlayer) -> NumberUtils.formatWithCommas(totalPrice));
         mainPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
+        mainPlaceholders.register("%sell_score_commas%",(offlinePlayer) ->   NumberUtils.formatWithCommas(totalScores));
         mainPlaceholders.register("%coefficient%", (offlinePlayer) ->  String.valueOf(plugin.getCoefficient().get(player, null)));
 
         mainPlaceholders.register("%global_auto_sell_toggle_state%", (offlinePlayer -> {
@@ -75,6 +84,7 @@ public class JGui extends AdvancedGui implements Listener {
                 return String.valueOf(plugin.getStorage().getScore(offlinePlayer.getUniqueId(), "global"));
             return "";
         });
+
         // Placeholder end
 
         registerButtons();
@@ -99,6 +109,7 @@ public class JGui extends AdvancedGui implements Listener {
                     return;
                 }
             }
+            Manager.refreshMenu(player, this, true);
             event.setCancelled(false);
         });
 
@@ -128,7 +139,7 @@ public class JGui extends AdvancedGui implements Listener {
         int rawSlot = e.getRawSlot();
         ClickType click = e.getClick();
 
-        if (!inventory.equals(topInventory)) return;
+        if (inventory==null || !inventory.equals(topInventory)) return;
 
         if (clickedInv != null && clickedInv.equals(topInventory)) {
             if (!sellZoneSlots.contains(rawSlot)) {
@@ -208,8 +219,18 @@ public class JGui extends AdvancedGui implements Listener {
             registerItem(button.id() + button.slot(), builder -> {
                 builder.slots(button.slot());
 
-                ItemWrapper wrapper = new ItemWrapper(button.material(), button.amount());
+                // VIEW REQUIREMENTS
+                if (!button.viewRequirements( ).isEmpty( )) {
+                    for (ViewRequirement requirement : button.viewRequirements( )) {
+                        if (!Requirements.check(player, requirement, totalPrice, totalScores, button)) {
+                            return;
+                        }
+                    }
+                }
+
+                ItemWrapper wrapper = new ItemWrapper(button.itemStack());
                 wrapper.displayName(TextUtil.setPapi(player, button.displayName()));
+
                 wrapper.lore(TextUtil.setPapi(player, button.lore()));
                 wrapper.customModelData(button.customModelData());
                 wrapper.enchanted(button.enchanted());
@@ -250,17 +271,19 @@ public class JGui extends AdvancedGui implements Listener {
 
                             if (allRequirementsPassed) {
                                 List<String> list = new ArrayList<>(cmd.actions());
-                                if (plugin.getItems().getItemValues().containsKey(button.material())) {
-                                    double price = plugin.getItems().getItemValues().get(button.material()).price();
+                                if (plugin.getItems().getItemValues().containsKey(button.itemStack().getType())) {
+                                    double price = plugin.getItems().getItemValues().get(button.itemStack().getType()).price();
                                     list.replaceAll(s -> s.replace("%price%", df.format(price)));
-                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", df.format(price * plugin.getCoefficient().get(player, button.material()))));
-                                    list.replaceAll(s -> s.replace("%auto_sell_toggle_state%", Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(button.material().name()))));
+                                    list.replaceAll(s -> s.replace("%price_commas%", NumberUtils.formatWithCommas(price)));
+                                    list.replaceAll(s -> s.replace("%price_with_coefficient%", df.format(price * plugin.getCoefficient().get(player, button.itemStack().getType()))));
 
                                 }
                                 ActionExecutor.execute(player, ActionRegistry.transform(list), button,
-                                        Placeholder.of("%coefficient%",() -> String.valueOf(plugin.getCoefficient().get(player, button.material()))),
+                                        Placeholder.of("%coefficient%",() -> String.valueOf(plugin.getCoefficient().get(player, button.itemStack().getType()))),
                                         Placeholder.of("%sell_pay%", () -> df.format(totalPrice)),
-                                        Placeholder.of("%sell_score%", () -> df.format(totalScores)));
+                                        Placeholder.of("%sell_pay_commas%", () -> NumberUtils.formatWithCommas(totalPrice)),
+                                        Placeholder.of("%sell_score%", () -> df.format(totalScores)),
+                                        Placeholder.of("%sell_score_commas%", () -> NumberUtils.formatWithCommas(totalScores)));
                                 break;
                             }
                         }
@@ -291,7 +314,7 @@ public class JGui extends AdvancedGui implements Listener {
                         try {
                             materialType = Material.valueOf(Manager.getAutoBuyItemToggle(wrapper, cmd));
                         } catch (IllegalArgumentException e) {
-                            materialType = button.material();
+                            materialType = button.itemStack().getType();
                         }
 
                         if (plugin.getItems().getItemValues().containsKey(materialType)) {
@@ -301,12 +324,16 @@ public class JGui extends AdvancedGui implements Listener {
 
                             double price = plugin.getItems().getItemValues().get(materialType).price();
 
-                            itemPlaceholders.register("%price%", (offlinePlayer) -> df.format(price));
+                            itemPlaceholders.register("%price%", (offlinePlayer) ->   df.format(price));
+                            itemPlaceholders.register("%price_commas%",(offlinePlayer) ->  NumberUtils.formatWithCommas(price));
                             Material finalMaterialType = materialType;
                             itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> df.format(price * plugin.getCoefficient().get(player, finalMaterialType)));
                             itemPlaceholders.register("%auto_sell_toggle_state%", (offlinePlayer) -> Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(finalMaterialType.name())));
-                            itemPlaceholders.register("%sell_pay%", (offlinePlayer) -> df.format(totalPrice));
-                            itemPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
+                            itemPlaceholders.register("%sell_pay%",(offlinePlayer) ->  df.format(totalPrice));
+                            itemPlaceholders.register("%sell_pay_commas%",(offlinePlayer) ->  NumberUtils.formatWithCommas(totalPrice));
+                            itemPlaceholders.register("%sell_score%", (offlinePlayer) ->  df.format(totalScores));
+                            itemPlaceholders.register("%sell_score_commas%",(offlinePlayer) ->  NumberUtils.formatWithCommas(totalScores));
+
                             wrapper.placeholderEngine(itemPlaceholders);
                             itemMeta.getPersistentDataContainer().set(NAMESPACED_KEY, PersistentDataType.STRING, "menu_priceItem");
                         }
@@ -317,9 +344,9 @@ public class JGui extends AdvancedGui implements Listener {
         }
 
         if (itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem")) {
-            wrapper.enchanted(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(materialType.name()));
+            if (plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(materialType.name())) itemMeta.addEnchant(Enchantment.KNOCKBACK, 0, false);
         } else if (itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_autobuy")) {
-            wrapper.enchanted(plugin.getStorage().getAutoBuyStatus(player.getUniqueId()));
+            if (plugin.getStorage().getAutoBuyStatus(player.getUniqueId())) itemMeta.addEnchant(Enchantment.KNOCKBACK, 0, false);
         }
 
         wrapper.itemStack().setItemMeta(itemMeta);

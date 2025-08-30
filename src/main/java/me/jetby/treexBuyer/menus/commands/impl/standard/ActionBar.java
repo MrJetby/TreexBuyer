@@ -1,15 +1,16 @@
-package me.jetby.treexBuyer.menus.commands.impl;
+package me.jetby.treexBuyer.menus.commands.impl.standard;
 
+import com.jodexindustries.jguiwrapper.api.text.SerializerType;
 import me.jetby.treexBuyer.menus.Button;
 import me.jetby.treexBuyer.menus.commands.Action;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ConsoleAction implements Action {
+public class ActionBar implements Action {
     @Override
     public void execute(@Nullable Player player, @NotNull String context, Button button) {
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), context);
+        if (player != null)
+            player.sendActionBar(SerializerType.LEGACY_AMPERSAND.deserialize(context));
     }
 }

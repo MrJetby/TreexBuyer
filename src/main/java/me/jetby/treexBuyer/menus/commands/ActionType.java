@@ -2,35 +2,37 @@ package me.jetby.treexBuyer.menus.commands;
 
 import lombok.Getter;
 import me.jetby.treexBuyer.Main;
-import me.jetby.treexBuyer.menus.commands.impl.*;
+import me.jetby.treexBuyer.menus.commands.impl.buyer.*;
+import me.jetby.treexBuyer.menus.commands.impl.standard.*;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
 public enum ActionType {
 
-    MESSAGE(new MessageAction()),
-    SOUND(new SoundAction()),
-    EFFECT(new EffectAction()),
-    ACTIONBAR(new ActionBarAction()),
-    TITLE(new TitleAction()),
-    CONSOLE(new ConsoleAction()),
-    PLAYER(new PlayerAction()),
-    BROADCASTMESSAGE(new BroadcastMessageAction()),
-    BROADCAST_MESSAGE(new BroadcastMessageAction()),
-    BROADCASTSOUND(new BroadcastSoundAction()),
-    BROADCAST_SOUND(new BroadcastSoundAction()),
-    BROADCASTTITLE(new BroadcastTitleAction()),
-    BROADCAST_TITLE(new BroadcastTitleAction()),
-    BROADCASTACTIONBAR(new BroadcastActionBarAction()),
-    CLOSE(new CloseMenuAction()),
-    SELL_ITEM(new ItemSellAction(Main.getInstance())),
-    SELL_ALL(new SellAllAction(Main.getInstance())),
-    ENABLE_ALL(new EnableALLAction(Main.getInstance())),
-    DISABLE_ALL(new DisableALLAction(Main.getInstance())),
-    AUTOBUY_STATUS_TOGGLE(new AutoBuyAction(Main.getInstance())),
-    AUTOBUY_ITEM_TOGGLE(new AutoBuyItemToggleAction(Main.getInstance())),
-    OPEN_MENU(new OpenMenuAction(Main.getInstance(), Main.getInstance().getMenuLoader())),
-    BROADCAST_ACTIONBAR(new BroadcastActionBarAction());
+    MESSAGE(new Message()),
+    SOUND(new Sound()),
+    EFFECT(new Effect()),
+    ACTIONBAR(new ActionBar()),
+    TITLE(new Title()),
+    CONSOLE(new Console()),
+    PLAYER(new Player()),
+    BROADCASTMESSAGE(new BroadcastMessage()),
+    BROADCAST_MESSAGE(new BroadcastMessage()),
+    BROADCASTSOUND(new BroadcastSound()),
+    BROADCAST_SOUND(new BroadcastSound()),
+    BROADCASTTITLE(new BroadcastTitle()),
+    BROADCAST_TITLE(new BroadcastTitle()),
+    BROADCASTACTIONBAR(new BroadcastActionBar()),
+    CLOSE(new CloseMenu()),
+    SELL_ITEM(new ItemSell(Main.getInstance())),
+    SELL_ALL(new SellAll(Main.getInstance())),
+    ENABLE_ALL(new EnableALL(Main.getInstance())),
+    DISABLE_ALL(new DisableALL(Main.getInstance())),
+    AUTOBUY_STATUS_TOGGLE(new AutoBuyStatusToggle(Main.getInstance())),
+    AUTOBUY_ITEM_TOGGLE(new AutoBuyItemToggle(Main.getInstance())),
+    OPEN(new OpenMenu(Main.getInstance(), Main.getInstance().getMenuLoader())),
+    OPEN_MENU(new OpenMenu(Main.getInstance(), Main.getInstance().getMenuLoader())),
+    BROADCAST_ACTIONBAR(new BroadcastActionBar());
 
     private final Action action;
 

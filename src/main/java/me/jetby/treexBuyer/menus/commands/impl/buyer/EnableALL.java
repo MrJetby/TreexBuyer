@@ -1,4 +1,4 @@
-package me.jetby.treexBuyer.menus.commands.impl;
+package me.jetby.treexBuyer.menus.commands.impl.buyer;
 
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.Button;
@@ -16,7 +16,7 @@ import java.util.List;
 
 import static me.jetby.treexBuyer.Main.NAMESPACED_KEY;
 
-public record EnableALLAction(Main plugin) implements Action {
+public record EnableALL(Main plugin) implements Action {
 
     @Override
     public void execute(@Nullable Player player, @NotNull String context, Button button) {

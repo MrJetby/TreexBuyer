@@ -22,8 +22,8 @@ import static me.jetby.treexBuyer.Main.df;
 
 @RequiredArgsConstructor
 public class AutoBuy {
-    private final Main plugin;
-    private int task;
+    final Main plugin;
+    int task;
 
     public void start() {
         plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, task -> {
@@ -114,7 +114,7 @@ public class AutoBuy {
 
     }
 
-    private @NotNull List<String> getStrings(double totalPrice, int totalScores) {
+    @NotNull List<String> getStrings(double totalPrice, int totalScores) {
         List<String> list = new ArrayList<>(plugin.getCfg().getAutoBuyActions());
 
         list.replaceAll(s -> s.replace("%sell_pay%", df.format(totalPrice)));

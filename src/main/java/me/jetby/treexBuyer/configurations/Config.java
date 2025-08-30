@@ -7,7 +7,6 @@ import me.jetby.treexBuyer.tools.TextUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,7 @@ import java.util.Map;
 public class Config {
 
     String storageType;
-    boolean yamlForceSave;
+    boolean isYamlOrJsonForceSave;
 
     ScoreType type;
     int scores;
@@ -46,7 +45,7 @@ public class Config {
         FileConfiguration configuration = FileLoader.getFileConfiguration("config.yml");
 
         storageType = configuration.getString("storage.type", "yaml").toUpperCase();
-        yamlForceSave = configuration.getBoolean("storage.yaml-force-save", false);
+        isYamlOrJsonForceSave = configuration.getBoolean("storage.yaml-or-json-force-save", false);
 
 
         host = configuration.getString("storage.host");
@@ -56,7 +55,7 @@ public class Config {
         password = configuration.getString("storage.password");
 
         autoBuyDelay = configuration.getInt("autobuy.delay", 60);
-        autoBuyActions = configuration.getStringList("autobuy.actions");
+        autoBuyActions = TextUtil.colorize(configuration.getStringList("autobuy.actions"));
         disabledWorlds = configuration.getStringList("autobuy.disabled-worlds");
         enable = TextUtil.colorize(configuration.getString("autobuy.status.enable", "&aВключён"));
         disable = TextUtil.colorize(configuration.getString("autobuy.status.disable", "&cВыключен"));

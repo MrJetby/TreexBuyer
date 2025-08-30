@@ -1,4 +1,4 @@
-package me.jetby.treexBuyer.menus.commands.impl;
+package me.jetby.treexBuyer.menus.commands.impl.standard;
 
 import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.menus.Button;
@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record OpenMenuAction(Main plugin, Loader menuLoader) implements Action {
+public record OpenMenu(Main plugin, Loader menuLoader) implements Action {
 
     @Override
     public void execute(@Nullable Player player, @NotNull String context, Button button) {
