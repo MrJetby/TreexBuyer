@@ -1,0 +1,54 @@
+id: mobs
+
+title: "Ресурсы с мобов"
+
+open_permission: none
+size: 54
+Items:
+  background:
+    material: WHITE_STAINED_GLASS_PANE
+    slot:
+      - 0-2
+      - 4
+      - 7-17
+      - 36-52
+    display_name: ""
+
+
+  mobs:
+    slot:
+      - 18-35
+    category: mobs
+    lore:
+      - ' &fИзначальная Цена &a&l$%price% '
+      - ' &fТекущая Цена &c&l$%price_with_coefficient%'
+      - ''
+      - ' &7Кликните чтобы переключить авто скупку'
+      - ' &7Сейчас %auto_sell_toggle_state%'
+      - ''
+    click_commands:
+      - '[AUTOBUY_ITEM_TOGGLE]'
+
+
+  menuMine:
+    material: NETHERITE_INGOT
+    slot: 3
+    display_name: "&6■ &fКатегория: &6Ресурсы из шахты &6■"
+    click_commands:
+      - '[open_menu] mine'
+
+  menuMobs:
+    material: COW_SPAWN_EGG
+    enchanted: true
+    slot: 5
+    display_name: "&6■ &fКатегория: &6Ресурсы с мобов &6■"
+    click_commands:
+      - '[open_menu] mobs'
+
+  back:
+    material: ARROW
+    slot: 53
+    display_name: "&6Вернуться"
+    click_commands:
+      - '[open_menu] seller'
+

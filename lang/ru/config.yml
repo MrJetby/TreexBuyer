@@ -1,0 +1,56 @@
+storage:
+  # YAML, MYSQL, SQLITE, JSON
+  type: "SQLITE"
+  #
+  # Если type установлен на YAML или JSON
+  #
+  # Если у вас большой онлайн, то рекомендуется включить эту опцию чтобы не нагружать сервер при работе с YAML/JSON
+  # true - Будет моментально сохранять данные в файл при изменении
+  # false - Будет сохранять данные в файл только при перезагрузке сервера
+  # Если у вас маленький онлайн, то можно оставить false
+  yaml-or-json-force-save: false
+  # Данные ниже используются только для MYSQL
+  host: "localhost"
+  port: 3306
+  database: "treexbuyer"
+  username: "root"
+  password: ""
+
+debug: false
+
+autobuy:
+  enable: true
+  delay: 60  # В тиках. Как часто будет срабатывать АвтоСкупка. По умолчанию 60 - 3 секунды
+  actions:
+    - '[MESSAGE] &aАвто-скупка &7» &7Продано предметов на сумму &6$%sell_pay_commas% &7(&e+%sell_score% очков&7)'
+    - '[SOUND] entity_player_levelup;0.1'
+  disabled-worlds:
+    - duel-1
+    - duel-2
+  status:
+    enable: "&aВключён"
+    disable: "&cВыключен"
+
+
+score-system:
+  # Как будет расти Коэффициент
+  # GLOBAL - На все предметы сразу
+  # ITEM - Для каждого предмета свой
+  # CATEGORY - Для каждой категории свой
+  type: GLOBAL
+  multiplier-ratio:
+    scores: 100
+    coefficient: 0.01
+
+  # максимальный коэффициент (без учёта донатных бустов)
+  default-coefficient: 1
+  max-legal-coefficient: 3
+
+  # если true, донатные бусты будут обходить значение в max-legal-coefficient
+  boosters_except_legal_coefficient: true
+
+  booster:
+    donat-1: # имя (может быть любым)
+      permission: 'buyer.boost.donat1' # (пермишен по которому будет определяться наличие буста)
+      external-coefficient: 0.5
+

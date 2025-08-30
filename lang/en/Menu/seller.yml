@@ -1,0 +1,138 @@
+####################################################################################################
+#
+# All commands
+#
+# [MESSAGE] Send a message to a player
+#
+# [BROADCAST_MESSAGE] Send a message to everyone
+#
+# [PLAYER] Execute a command as the player
+#
+# [CONSOLE] Execute a command as the console
+#
+# [ACTIONBAR] Send text to a player's actionbar
+#
+# [BROADCAST_ACTIONBAR] Send text to everyone's actionbar
+#
+# [SOUND] Play a sound for a player
+#
+# [BROADCAST_SOUND] Play a sound for everyone
+#
+# [EFFECT] Give a player an effect
+#
+# [TITLE] Send a title to a player; to send a subtitle, use the ";" symbol
+# Example: [TITLE] First;Second
+#
+# [BROADCAST_TITLE] Send a title to everyone
+#
+# [CLOSE] Close the menu
+#
+# [OPEN] Open the menu
+#
+# [AUTOBUY_ITEM_TOGGLE] Toggle an item in the autobuy items list
+#
+# [AUTOBUY_STATUS_TOGGLE] Toggle the autobuy status
+#
+# [ENABLE_ALL] Add all items that have the [AUTOBUY_ITEM_TOGGLE] command in the current GUI to the autobuy list
+#
+# [DISABLE_ALL] Remove all items that have the [AUTOBUY_ITEM_TOGGLE] command in the current GUI from the autobuy list
+#
+# [SELL_ITEM] <amount>/all
+# You can also use the placeholder %item_amount% in _requirements checks
+#
+# [SELL_ALL] Sell all items from the sell-zone
+#
+####################################################################################################
+#
+# Click types
+#
+# left_click_commands
+# right_click_commands
+# shift_left_click_commands
+# shift_right_click_commands
+# click_commands
+# drop_commands
+#
+# Requirement types
+#
+# left_click_requirements
+# right_click_requirements
+# shift_left_click_requirements
+# shift_right_click_requirements
+# click_requirements
+# drop_requirements
+#
+# view_requirements
+#
+####################################################################################################
+#
+# Internal placeholders:
+#
+# %price%
+# %price_commas%
+# %coefficient%
+# %score%
+# %score_commas%
+# %sell_pay%
+# %sell_pay_commas%
+# %sell_score%
+# %sell_score_commas%
+# %price_with_coefficient%
+# %auto_sell_toggle_state%
+# %global_auto_sell_toggle_state%
+#
+####################################################################################################
+
+id: seller
+
+title: Скупщик
+open_commands:
+  - 'seller'
+  - 'buyer'
+open_permission: none
+size: 54
+Items:
+
+  zone:
+    sell-zone: true
+    slot: 0-44
+
+  background:
+    material: BLACK_STAINED_GLASS_PANE
+    slot: 46-52
+    display_name: ' '
+
+  sell:
+    material: LIME_DYE
+    slot: 53
+    display_name: ' '
+    lore:
+      - ' &fНажмите чтобы сдать все предметы '
+      - ' &fПредметов на сумму: &7$%sell_pay% &fи &e%sell_score% &fочков '
+      - ''
+    click_requirements:
+      'проверка есть ли у игрока предметы':
+        type: javascript
+        input: '%sell_pay% > 0'
+        deny_commands:
+          - '[message] <#E8A309>Скупщик</#EFCF48> &7» <#D92D2D>Не хватает ресурсов'
+          - '[sound] entity_villager_no;1'
+    click_commands:
+      - '[message] <#E8A309>Скупщик</#EFCF48> &7» &7Продано предметов на сумму &6$%sell_pay% &7(&e+%sell_score% очков&7)'
+      - '[sound] entity_player_levelup;1'
+      - '[sell_all]'
+  category:
+    material: MINECART
+    slot: 45
+    display_name: ' '
+    lore:
+      - ' &fТекущий коэффицент: &6x%coefficient%'
+      - ' &fОчков: &6%score%'
+      - '  '
+      - ' <#E8A309>Настройка авто-скупки</#EFCF48> '
+      - ' '
+    click_commands:
+      - '[open_menu] mine'
+
+
+

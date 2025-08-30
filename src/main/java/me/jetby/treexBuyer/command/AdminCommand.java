@@ -183,15 +183,26 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             try {
                 plugin.getCfg().load();
                 plugin.getItems().load();
+
+                for (UUID uuid : plugin.getMenuLoader().getJGui().keySet()) {
+                    JGui jGui = plugin.getMenuLoader().getJGui().get(uuid);
+                    Bukkit.getScheduler().runTask(plugin, () -> jGui.close());
+                }
                 plugin.getMenuLoader().load();
 
                 plugin.getAutoBuy().stop();
                 plugin.getAutoBuy().start();
 
-                CommandRegistrar.unregisterAll(plugin);
-                CommandRegistrar.createCommands(plugin);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    CommandRegistrar.unregisterAll(plugin);
+                    CommandRegistrar.createCommands(plugin);
+                });
+
             } catch (Exception ex) {
                 Logger.error("Error with config reloading: " + ex);
+                if (sender instanceof Player) sender.sendMessage(TextUtil.colorize("&#EF473AError with config reloading: "+ex));
+
+                return;
             }
 
             sender.sendMessage(TextUtil.colorize("&#82FB16Successfully reloaded, took only " + (System.currentTimeMillis() - start) + " ms."));

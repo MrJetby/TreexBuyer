@@ -1,0 +1,85 @@
+id: mine
+
+title: "&0Resources from the mine"
+
+open_permission: none
+size: 54
+
+
+Items:
+  background:
+    material: BLACK_STAINED_GLASS_PANE
+    slot:
+      - 0-2
+      - 7-17
+      - 36-44
+      - 46-48
+      - 50-52
+    display_name: " "
+
+  mobs:
+    slot:
+      - 18-35
+    category: mine
+    lore:
+      - ' &fOriginal Price &a&l$%price% '
+      - ' &fCurrent Price &c&l$%price_with_coefficient%'
+      - ''
+      - ' &7Click to toggle auto buy'
+      - ' &7Status %auto_sell_toggle_state%'
+      - ''
+    click_commands:
+      - '[AUTOBUY_ITEM_TOGGLE]'
+
+
+
+  menuMine:
+    material: NETHERITE_INGOT
+    enchanted: true
+    slot: 3
+    display_name: "&6■ &fCategory: &6Resources from the mine &6■"
+    click_commands:
+      - '[open_menu] mine'
+
+  menuMobs:
+    material: COW_SPAWN_EGG
+    slot: 5
+    display_name: "&6■ &fCategory: &6Resources from mobs &6■"
+    click_commands:
+      - '[open_menu] mobs'
+
+  back:
+    material: ARROW
+    slot: 49
+    display_name: "&6Back"
+    click_commands:
+      - '[open_menu] seller'
+
+  autobuy:
+    material: SLIME_BALL
+    slot: 4
+    display_name: '&7Auto buy'
+    lore:
+      - '&r '
+      - '&r &fClick to enable/disable auto buy'
+      - '&r &fStatus: %global_auto_sell_toggle_state%'
+      - '&r '
+    click_commands:
+      - '[AUTOBUY_STATUS_TOGGLE]'
+
+
+  disable:
+    material: GRAY_DYE
+    slot: 45
+    display_name: '&cDisable all'
+    click_commands:
+      - '[DISABLE_ALL]'
+
+  enable:
+    material: LIME_DYE
+    slot: 53
+    display_name: '&aEnable all'
+    click_commands:
+      - '[ENABLE_ALL]'
+
+

@@ -9,6 +9,7 @@ import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.functions.AutoBuy;
 import me.jetby.treexBuyer.functions.Coefficient;
 import me.jetby.treexBuyer.menus.CommandRegistrar;
+import me.jetby.treexBuyer.menus.JGui;
 import me.jetby.treexBuyer.menus.Loader;
 import me.jetby.treexBuyer.storage.JSON;
 import me.jetby.treexBuyer.storage.SQL;
@@ -17,6 +18,7 @@ import me.jetby.treexBuyer.storage.Yaml;
 import me.jetby.treexBuyer.tools.Logger;
 import me.jetby.treexBuyer.tools.Metrics;
 import me.jetby.treexBuyer.tools.TreexBuyerPlaceholders;
+import me.jetby.treexBuyer.tools.Version;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.PluginCommand;
@@ -24,6 +26,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.text.DecimalFormat;
+import java.util.UUID;
 
 @Getter
 public final class Main extends JavaPlugin {
@@ -50,8 +53,11 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Logger.success("------------------------");
-        Logger.success("");
+        Logger.success("Looking for updates..");
+        Version version = new Version(this);
+        for (String str : version.getAlert()) {
+            Logger.success(str);
+        }
         Logger.success("Enabling TreexBuyer...");
         INSTANCE = this;
 
@@ -134,6 +140,12 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+
+        for (UUID uuid : menuLoader.getJGui().keySet()) {
+            JGui jGui = menuLoader.getJGui().get(uuid);
+            jGui.close();
+        }
+
         if (treexBuyerPlaceholders != null) {
             if (treexBuyerPlaceholders.isRegistered()) {
                 treexBuyerPlaceholders.unregister();

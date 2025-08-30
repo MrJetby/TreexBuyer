@@ -1,0 +1,65 @@
+
+
+# Categories:
+categories:
+  mine:
+    - NETHERITE_INGOT
+    - NETHERITE_SCRAP
+    - DIAMOND
+    - GOLD_INGOT
+    - IRON_INGOT
+    - REDSTONE
+    - LAPIS_LAZULI
+    - COAL
+    - QUARTZ
+  mob_drops:
+    - BONE
+    - LEATHER
+    - STRING
+    - SPIDER_EYE
+
+# Item price
+NETHERITE_INGOT:
+  price: 10000
+  add-scores: 250
+NETHERITE_SCRAP:
+  price: 2000
+  add-scores: 100
+EMERALD:
+  price: 1500
+  add-scores: 80
+DIAMOND:
+  price: 500
+  add-scores: 50
+GOLD_INGOT:
+  price: 200
+  add-scores: 50
+IRON_INGOT:
+  price: 80
+  add-scores: 50
+REDSTONE:
+  price: 15
+  add-scores: 50
+LAPIS_LAZULI:
+  price: 5
+  add-scores: 50
+COAL:
+  price: 8
+  add-scores: 50
+QUARTZ:
+  price: 10
+  add-scores: 50
+BONE:
+  price: 5
+  add-scores: 50
+LEATHER:
+  price: 15
+  add-scores: 50
+STRING:
+  price: 25
+  add-scores: 50
+SPIDER_EYE:
+  price: 50
+  add-scores: 50
+
+

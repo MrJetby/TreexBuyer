@@ -1,0 +1,54 @@
+id: mobs
+
+title: "&0Resources from mobs"
+
+open_permission: none
+size: 54
+Items:
+  background:
+    material: WHITE_STAINED_GLASS_PANE
+    slot:
+      - 0-2
+      - 4
+      - 7-17
+      - 36-52
+    display_name: ""
+
+
+  mobs:
+    slot:
+      - 18-35
+    category: mobs
+    lore:
+      - ' &fOriginal Price &a&l$%price% '
+      - ' &fCurrent Price &c&l$%price_with_coefficient%'
+      - ''
+      - ' &7Click to toggle auto buy'
+      - ' &7Status %auto_sell_toggle_state%'
+      - ''
+    click_commands:
+      - '[AUTOBUY_ITEM_TOGGLE]'
+
+
+  menuMine:
+    material: NETHERITE_INGOT
+    slot: 3
+    display_name: "&6■ &fCategory: &6Resources from the mine &6■"
+    click_commands:
+      - '[open_menu] mine'
+
+  menuMobs:
+    material: COW_SPAWN_EGG
+    enchanted: true
+    slot: 5
+    display_name: "&6■ &fCategory: &6Resources from mobs &6■"
+    click_commands:
+      - '[open_menu] mobs'
+
+  back:
+    material: ARROW
+    slot: 53
+    display_name: "&6Back"
+    click_commands:
+      - '[open_menu] seller'
+

@@ -1,0 +1,55 @@
+storage:
+  # YAML, MYSQL, SQLITE, JSON
+  type: "YAML"
+  #
+  # If type is set to YAML or JSON
+  #
+  # If you have a large online, it is recommended to enable this option to avoid loading the server when working with YAML/JSON
+  # true - Will instantly save data to a file when changing
+  # false - Will save data to a file only when the server is rebooted
+  # If you have a small online, you can leave false
+  yaml-or-json-force-save: false
+  # The data below is used for MYSQL only.
+  host: "localhost"
+  port: 3306
+  database: "treexbuyer"
+  username: "root"
+  password: ""
+
+debug: false
+
+autobuy:
+  delay: 60  # In ticks. How often AutoBuy will be triggered. Default is 60 - 3 seconds
+  actions:
+    - '[MESSAGE] &aAuto-buy &7» Items sold for &6$%sell_pay_commas% &7(&e+%sell_score% points&7)'
+    - '[SOUND] entity_player_levelup;0.1'
+  disabled-worlds:
+    - duel-1
+    - duel-2
+  status:
+    enable: "&aEnabled"
+    disable: "&cDisabled"
+
+
+score-system:
+  # How will the Coefficient grow
+  # GLOBAL - For all subjects at once
+  # ITEM - For each subject its own
+  # CATEGORY - For each category its own
+  type: GLOBAL
+  multiplier-ratio:
+    scores: 100
+    coefficient: 0.01
+
+  # maximum coefficient (excluding donation boosts)
+  default-coefficient: 1
+  max-legal-coefficient: 3
+
+  # if true, donation boosts will bypass the value in max-legal-coefficient
+  boosters_except_legal_coefficient: true
+
+  booster:
+    donat-1: # name (can be any)
+      permission: 'buyer.boost.donat1' # (permission by which the presence of a boost will be determined)
+      external-coefficient: 0.5
+
