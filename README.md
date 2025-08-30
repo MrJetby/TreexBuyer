@@ -20,7 +20,7 @@
 ## Found a bug?
 
 Found a bug or want to suggest an idea?
-- Create an [Issue on GitHub](https://github.com/MrJetby/TreexBuyer2/issues).
+- Create an [Issue on GitHub](https://github.com/MrJetby/TreexBuyer3/issues).
 - Or contact us on Discord: [TreexStudio](https://discord.gg/RcnDgRQVqY)
 
 Thank you for using **TreexBuyer**!
