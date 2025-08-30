@@ -1,7 +1,7 @@
 name: TreexBuyer
-version: '1.0'
+version: '3.0'
 main: me.jetby.treexBuyer.Main
-api-version: '1.18'
+api-version: '1.16'
 load: STARTUP
 authors: [ MrJetby ]
 website: https://dsc.gg/treexstudio

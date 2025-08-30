@@ -16,6 +16,7 @@ public record Button(
         int customModelData,
         boolean enchanted,
         boolean sellZone,
+        String category,
         ItemStack itemStack,
         List<ViewRequirement> viewRequirements,
         List<Command> commands

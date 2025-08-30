@@ -74,7 +74,7 @@ public class Manager {
                     itemMeta.setLore(button.lore());
 
                     if (itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_autobuy")) {
-                        wrapper.enchanted(jGui.plugin.getStorage().getAutoBuyStatus(player.getUniqueId()));
+                        if (jGui.plugin.getStorage().getAutoBuyStatus(player.getUniqueId())) itemMeta.addEnchant(Enchantment.KNOCKBACK, 1, false);
                     }
                     if (!button.commands().isEmpty()) {
                         for (Command command : button.commands()) {
@@ -86,12 +86,16 @@ public class Manager {
                                 }
                             }
                             if (!hasCmd) continue;
-                            if (!jGui.plugin.getItems().getItemValues().containsKey(wrapper.itemStack().getType()))
+                            if (!jGui.plugin.getItems().getItemValues().containsKey(itemStack.getType()))
                                 continue;
                             if (!itemMeta.getPersistentDataContainer().get(NAMESPACED_KEY, PersistentDataType.STRING).equalsIgnoreCase("menu_priceItem"))
                                 continue;
 
-                            if (jGui.plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(wrapper.itemStack().getType().name())) itemMeta.addEnchant(Enchantment.KNOCKBACK, 0, false);
+                            if (jGui.plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(itemStack.getType().name()))  {
+                                itemMeta.addEnchant(Enchantment.KNOCKBACK, 1, false);
+                            }else {
+                                itemMeta.removeEnchant(Enchantment.KNOCKBACK);
+                            }
                             break;
                         }
 

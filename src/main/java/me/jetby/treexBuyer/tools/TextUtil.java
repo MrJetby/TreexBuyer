@@ -29,16 +29,41 @@ public class TextUtil {
         return PlaceholderAPI.setPlaceholders(player, text);
     }
 
-    public List<String> colorize( @Nullable List<String> list) {
-
+    public List<String> colorize(List<String> list) {
         List<String> strings = new ArrayList<>();
-        if (list==null) return strings;
         for (String string : list) {
             strings.add(colorize(string));
         }
         return strings;
     }
 
+    public List<String> colorize(List<String> list, boolean withoutChatColor) {
+        List<String> strings = new ArrayList<>();
+        for (String string : list) {
+            strings.add(colorize(string, true));
+        }
+        return strings;
+    }
+
+
+    public String colorize(String message, boolean withoutChatColor) {
+        Matcher matcher = HEX_PATTERN.matcher(message);
+        StringBuilder builder = new StringBuilder(message.length() + 32);
+        while (matcher.find()) {
+            String group = matcher.group(1);
+            matcher.appendReplacement(builder,
+                    COLOR_CHAR + "x" +
+                            COLOR_CHAR + group.charAt(0) +
+                            COLOR_CHAR + group.charAt(1) +
+                            COLOR_CHAR + group.charAt(2) +
+                            COLOR_CHAR + group.charAt(3) +
+                            COLOR_CHAR + group.charAt(4) +
+                            COLOR_CHAR + group.charAt(5));
+        }
+        message = matcher.appendTail(builder).toString();
+        message = processGradients(message);
+        return message;
+    }
     public String colorize(@Nullable String message) {
         if (message==null) return "";
         message = processGradients(message);
@@ -59,6 +84,20 @@ public class TextUtil {
         message = matcher.appendTail(builder).toString();
         return translateAlternateColorCodes('&', message);
     }
+    public String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
+        final char[] b = textToTranslate.toCharArray();
+
+        for (int i = 0, length = b.length - 1; i < length; ++i) {
+            if (b[i] == altColorChar && isValidColorCharacter(b[i + 1])) {
+                b[i++] = COLOR_CHAR;
+                b[i] |= 0x20;
+            }
+        }
+
+        return new String(b);
+    }
+
+
 
     private String processGradients(String message) {
         Matcher matcher = GRADIENT_TAG.matcher(message);
@@ -83,7 +122,8 @@ public class TextUtil {
                     output.append(matcher.group(0));
                 }
             } else {
-                String colored = applyGradient(buffer.toString(), startHex, hex);
+                String endHex = hex;
+                String colored = applyGradient(buffer.toString(), startHex, endHex);
                 output.append(colored);
                 if (slash.isEmpty()) {
                     startHex = hex;
@@ -164,22 +204,12 @@ public class TextUtil {
         return segment.toString();
     }
 
+
+
     private boolean isFormat(char c) {
         return c == 'k' || c == 'l' || c == 'm' || c == 'n' || c == 'o';
     }
 
-    public String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
-        final char[] b = textToTranslate.toCharArray();
-
-        for (int i = 0, length = b.length - 1; i < length; ++i) {
-            if (b[i] == altColorChar && isValidColorCharacter(b[i + 1])) {
-                b[i++] = COLOR_CHAR;
-                b[i] |= 0x20;
-            }
-        }
-
-        return new String(b);
-    }
 
     private boolean isValidColorCharacter(char c) {
         return (c >= '0' && c <= '9') ||

@@ -3,6 +3,7 @@ package me.jetby.treexBuyer.menus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.jetby.treexBuyer.Main;
+import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.menus.commands.Command;
 import me.jetby.treexBuyer.menus.requirements.ClickRequirement;
 import me.jetby.treexBuyer.menus.requirements.ViewRequirement;
@@ -35,6 +36,8 @@ public class Loader {
 
     public void load() {
 
+        menus.clear();
+        amount = 0;
 
         File folder = new File(file, "Menu");
 
@@ -79,7 +82,7 @@ public class Loader {
         try {
             FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-            String title = TextUtil.colorize(config.getString("title"));
+            String title = TextUtil.colorize(config.getString("title"), true);
             InventoryType type = InventoryType.valueOf(config.getString("type", "CHEST"));
             int size = config.getInt("size", 27);
             String permission = config.getString("open_permission");
@@ -102,13 +105,14 @@ public class Loader {
                 ConfigurationSection itemSection = itemsSection.getConfigurationSection(key);
                 if (itemSection != null) {
                     String displayName = itemSection.getString("display_name");
-                    if (displayName!=null) displayName = TextUtil.colorize(displayName);
-                    List<String> lore = TextUtil.colorize(itemSection.getStringList("lore"));
+                    if (displayName!=null) displayName = TextUtil.colorize(displayName, true);
+                    List<String> lore = TextUtil.colorize(itemSection.getStringList("lore"), true);
                     List<Integer> slots = parseSlots(itemSection.get("slot"));
                     int amount = itemSection.getInt("amount", 1);
                     int customModelData = itemSection.getInt("custom-model-data", 0);
                     boolean enchanted = itemSection.getBoolean("enchanted", false);
                     boolean sellZone = itemSection.getBoolean("sell-zone", false);
+                    String category = itemSection.getString("category");
                     String defaultMaterial;
                     if (sellZone) {
                         defaultMaterial = "AIR";
@@ -130,10 +134,27 @@ public class Loader {
 
                     itemStack.setAmount(amount);
 
+                    int a = 0;
+                    List<Material> items = null;
+
+                    if (category != null) {
+                        items = plugin.getItems().getCategories().get(category);
+                    }
                     for (Integer slot : slots) {
-                        buttons.add(new Button(key, displayName, lore, slot, amount, customModelData, enchanted, sellZone, itemStack,
-                                requirements(itemSection),
-                                loadCommands(itemSection)));
+                        if (category != null && items != null && !items.isEmpty()) {
+                            if (a==items.size()) break;
+
+                            Material mat = items.get(a);
+                                buttons.add(new Button(key, displayName, lore, slot, amount, customModelData, enchanted, sellZone, category, new ItemStack(mat),
+                                        requirements(itemSection),
+                                        loadCommands(itemSection)));
+                            a++;
+                        } else {
+                            buttons.add(new Button(key, displayName, lore, slot, amount, customModelData, enchanted, sellZone, null, itemStack,
+                                    requirements(itemSection),
+                                    loadCommands(itemSection)));
+                        }
+
                     }
                 }
             }

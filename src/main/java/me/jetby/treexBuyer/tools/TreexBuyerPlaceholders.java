@@ -33,8 +33,8 @@ public class TreexBuyerPlaceholders extends PlaceholderExpansion {
             String string = identifier.replace("coefficient_category_", "");
             return String.valueOf(plugin.getCoefficient().getByCategory(player, string));
         }
-        if (identifier.startsWith("coefficient_score_".toLowerCase())) {
-            String string = identifier.replace("coefficient_score_", "").toUpperCase();
+        if (identifier.startsWith("score_".toLowerCase())) {
+            String string = identifier.replace("score_", "").toUpperCase();
             try {
                 Material material = Material.valueOf(string);
                 return String.valueOf(plugin.getStorage().getScore(player.getUniqueId(), material.name()));

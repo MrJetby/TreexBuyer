@@ -1,6 +1,6 @@
 storage:
   # YAML, MYSQL, SQLITE, JSON
-  type: "YAML"
+  type: "SQLITE"
   #
   # Если type установлен на YAML или JSON
   #
@@ -22,7 +22,8 @@ autobuy:
   enable: true
   delay: 60  # В тиках. Как часто будет срабатывать АвтоСкупка. По умолчанию 60 - 3 секунды
   actions:
-    - '[MESSAGE] &8&l> &fАвтоматически продано предметов на сумму &a&l%sell_pay%&f, и &c&l%sell_score% &fочков.'
+    - '[MESSAGE] &aАвто-скупка &7» &7Продано предметов на сумму &6$%sell_pay_commas% &7(&e+%sell_score% очков&7)'
+    - '[SOUND] entity_player_levelup;0.1'
   disabled-worlds:
     - duel-1
     - duel-2

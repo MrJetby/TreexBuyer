@@ -14,7 +14,6 @@ import me.jetby.treexBuyer.menus.requirements.Requirements;
 import me.jetby.treexBuyer.menus.requirements.ClickRequirement;
 import me.jetby.treexBuyer.menus.requirements.ViewRequirement;
 import me.jetby.treexBuyer.tools.NumberUtils;
-import me.jetby.treexBuyer.tools.TextUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -60,6 +59,7 @@ public class JGui extends AdvancedGui implements Listener {
         super(menu.size(), menu.title());
 
         type(menu.type());
+        defaultSerializer = SerializerType.LEGACY_SECTION;
 
         this.menu = menu;
         this.player = player;
@@ -67,10 +67,10 @@ public class JGui extends AdvancedGui implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
 
         // Placeholders start
-        mainPlaceholders.register("%sell_pay%",(offlinePlayer) ->  df.format(totalPrice));
+        mainPlaceholders.register("%sell_pay%",(offlinePlayer) ->   df.format(totalPrice));
         mainPlaceholders.register("%sell_pay_commas%", (offlinePlayer) -> NumberUtils.formatWithCommas(totalPrice));
         mainPlaceholders.register("%sell_score%", (offlinePlayer) -> df.format(totalScores));
-        mainPlaceholders.register("%sell_score_commas%",(offlinePlayer) ->   NumberUtils.formatWithCommas(totalScores));
+        mainPlaceholders.register("%sell_score_commas%",(offlinePlayer) -> NumberUtils.formatWithCommas(totalScores));
         mainPlaceholders.register("%coefficient%", (offlinePlayer) ->  String.valueOf(plugin.getCoefficient().get(player, null)));
 
         mainPlaceholders.register("%global_auto_sell_toggle_state%", (offlinePlayer -> {
@@ -82,6 +82,11 @@ public class JGui extends AdvancedGui implements Listener {
         mainPlaceholders.register("%score%", (offlinePlayer) -> {
             if (offlinePlayer != null)
                 return String.valueOf(plugin.getStorage().getScore(offlinePlayer.getUniqueId(), "global"));
+            return "";
+        });
+        mainPlaceholders.register("%score_commas%", (offlinePlayer) -> {
+            if (offlinePlayer != null)
+                return NumberUtils.formatWithCommas(plugin.getStorage().getScore(offlinePlayer.getUniqueId(), "global"));
             return "";
         });
 
@@ -229,9 +234,9 @@ public class JGui extends AdvancedGui implements Listener {
                 }
 
                 ItemWrapper wrapper = new ItemWrapper(button.itemStack());
-                wrapper.displayName(TextUtil.setPapi(player, button.displayName()));
+                if (button.displayName()!=null) wrapper.displayName(button.displayName());
 
-                wrapper.lore(TextUtil.setPapi(player, button.lore()));
+                wrapper.lore(button.lore());
                 wrapper.customModelData(button.customModelData());
                 wrapper.enchanted(button.enchanted());
                 wrapper.placeholderEngine(mainPlaceholders);
