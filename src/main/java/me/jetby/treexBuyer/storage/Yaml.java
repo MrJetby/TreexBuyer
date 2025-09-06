@@ -5,17 +5,17 @@ import me.jetby.treexBuyer.Main;
 import me.jetby.treexBuyer.tools.FileLoader;
 import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 public class Yaml implements Storage {
     final Main plugin;
-    final Map<UUID, PlayerData> cache = new HashMap<>( );
+    final Map<UUID, PlayerData> cache = new ConcurrentHashMap<>( );
     final FileConfiguration configuration = FileLoader.getFileConfiguration("storage.yml");
 
     @Override

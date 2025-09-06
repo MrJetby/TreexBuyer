@@ -38,6 +38,8 @@ score-system:
   # ITEM - Для каждого предмета свой
   # CATEGORY - Для каждой категории свой
   type: GLOBAL
+
+  # Каждые 100 очков юзеру прибавляется +0.01 множителя
   multiplier-ratio:
     scores: 100
     coefficient: 0.01

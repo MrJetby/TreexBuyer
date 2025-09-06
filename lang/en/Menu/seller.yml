@@ -78,6 +78,7 @@
 # %sell_score%
 # %sell_score_commas%
 # %price_with_coefficient%
+# %price_with_coefficient_commas%
 # %auto_sell_toggle_state%
 # %global_auto_sell_toggle_state%
 #

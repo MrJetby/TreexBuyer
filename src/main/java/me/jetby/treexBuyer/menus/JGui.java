@@ -281,6 +281,7 @@ public class JGui extends AdvancedGui implements Listener {
                                     list.replaceAll(s -> s.replace("%price%", df.format(price)));
                                     list.replaceAll(s -> s.replace("%price_commas%", NumberUtils.formatWithCommas(price)));
                                     list.replaceAll(s -> s.replace("%price_with_coefficient%", df.format(price * plugin.getCoefficient().get(player, button.itemStack().getType()))));
+                                    list.replaceAll(s -> s.replace("%price_with_coefficient_commas%", NumberUtils.formatWithCommas((price * plugin.getCoefficient().get(player, button.itemStack().getType())))));
 
                                 }
                                 ActionExecutor.execute(player, ActionRegistry.transform(list), button,
@@ -333,6 +334,7 @@ public class JGui extends AdvancedGui implements Listener {
                             itemPlaceholders.register("%price_commas%",(offlinePlayer) ->  NumberUtils.formatWithCommas(price));
                             Material finalMaterialType = materialType;
                             itemPlaceholders.register("%price_with_coefficient%", (offlinePlayer) -> df.format(price * plugin.getCoefficient().get(player, finalMaterialType)));
+                            itemPlaceholders.register("%price_with_coefficient_commas%", (offlinePlayer) -> NumberUtils.formatWithCommas(price * plugin.getCoefficient().get(player, finalMaterialType)));
                             itemPlaceholders.register("%auto_sell_toggle_state%", (offlinePlayer) -> Manager.check(plugin.getStorage().getAutoBuyItems(player.getUniqueId()).contains(finalMaterialType.name())));
                             itemPlaceholders.register("%sell_pay%",(offlinePlayer) ->  df.format(totalPrice));
                             itemPlaceholders.register("%sell_pay_commas%",(offlinePlayer) ->  NumberUtils.formatWithCommas(totalPrice));

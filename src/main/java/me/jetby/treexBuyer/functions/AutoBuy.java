@@ -96,6 +96,7 @@ public class AutoBuy {
             totalPrice += price * itemStack.getAmount();
 
             if (score > 0) {
+                totalScores+= score;
                 String key = plugin.getCoefficient().determineKey(itemStack.getType());
                 plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) + score);
             }
