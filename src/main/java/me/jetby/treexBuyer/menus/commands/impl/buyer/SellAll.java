@@ -6,6 +6,7 @@ import me.jetby.treexBuyer.menus.Button;
 import me.jetby.treexBuyer.menus.JGui;
 import me.jetby.treexBuyer.menus.Manager;
 import me.jetby.treexBuyer.menus.commands.Action;
+import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -32,32 +33,34 @@ public record SellAll(Main plugin) implements Action {
         if (inventory == plugin.getMenuLoader().getJGui().get(player.getUniqueId()).getInventory()) {
             JGui jGui = plugin.getMenuLoader().getJGui().get(player.getUniqueId());
             double totalPrice = 0.0;
-            int totalScores = 0;
             for (int i : jGui.getSellZoneSlots()) {
 
                 ItemStack itemStack = inventory.getItem(i);
                 if (itemStack == null) continue;
-                if (itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING))
-                    continue;
+                if (itemStack.getItemMeta().getPersistentDataContainer().has(NAMESPACED_KEY, PersistentDataType.STRING)) continue;
                 if (!isRegularItem(itemStack)) continue;
 
                 if (!plugin.getItems().getItemValues().containsKey(itemStack.getType())) continue;
                 Items.ItemData itemData = plugin.getItems().getItemValues().get(itemStack.getType());
 
-                double price = itemData.price() * plugin.getCoefficient().get(player, button.itemStack().getType());
-                int score = itemData.score();
-
-                inventory.setItem(i, null);
+                double price = itemData.price() * plugin.getCoefficient().get(player, itemStack.getType());
+                int score = itemData.score() * itemStack.getAmount();
 
                 totalPrice += price * itemStack.getAmount();
-                totalScores += score * itemStack.getAmount();
 
+                if (score > 0) {
+                    String key = plugin.getCoefficient().determineKey(itemStack.getType());
+                    plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) + score);
+                }
+
+                inventory.setItem(i, null);
             }
+
+
+
             if (totalPrice > 0L) {
                 plugin.getEconomy().depositPlayer(player, totalPrice);
             }
-            if (totalScores > 0)
-                plugin.getStorage().setScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.itemStack().getType()), plugin.getStorage().getScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.itemStack().getType())) + totalScores);
 
             Manager.refreshMenu(player, jGui, true);
 

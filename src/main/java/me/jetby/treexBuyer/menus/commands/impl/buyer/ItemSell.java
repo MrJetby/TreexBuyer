@@ -52,7 +52,9 @@ public record ItemSell(Main plugin) implements Action {
         int score = plugin.getItems().getItemValues().get(item).score();
 
         plugin.getEconomy().depositPlayer(player, price);
-        plugin.getStorage().setScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.itemStack().getType()), plugin.getStorage().getScore(player.getUniqueId(), plugin.getCoefficient().determineKey(button.itemStack().getType())) + score);
+        String key = plugin.getCoefficient().determineKey(button.itemStack().getType());
+
+        plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) + score);
 
         player.getInventory().removeItem(new ItemStack(item, amount));
 

@@ -132,7 +132,6 @@ public class JSON implements Storage {
 
     @Override
     public void setScore(UUID uuid, String key, int score) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
             data.scores.put(key.toLowerCase(), score);
             if (plugin.getCfg().isYamlOrJsonForceSave()) {
@@ -140,7 +139,6 @@ public class JSON implements Storage {
                     Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
                 }
             }
-        });
     }
 
     @Override
@@ -152,7 +150,6 @@ public class JSON implements Storage {
     @Override
     public void setAutoBuyItems(UUID uuid, List<String> items) {
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
             data.autoBuyItems = new ArrayList<>(items);
             if (plugin.getCfg().isYamlOrJsonForceSave()) {
@@ -160,8 +157,6 @@ public class JSON implements Storage {
                     Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
                 }
             }
-
-        });
     }
 
     @Override
@@ -173,7 +168,6 @@ public class JSON implements Storage {
     @Override
     public void setAutoBuyStatus(UUID uuid, boolean status) {
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerData data = cache.computeIfAbsent(uuid, k -> new PlayerData());
             data.autoBuy = status;
             if (plugin.getCfg().isYamlOrJsonForceSave()) {
@@ -181,7 +175,6 @@ public class JSON implements Storage {
                     Logger.error("Failed to save autoBuyItems for UUID: " + uuid);
                 }
             }
-        });
     }
 
     @Override

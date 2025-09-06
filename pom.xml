@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.jetby</groupId>
-    <artifactId>TreexBuyer</artifactId>
-    <version>3.0</version>
+    <artifactId>TreexBuyer-RU</artifactId>
+    <version>3.1</version>
     <packaging>jar</packaging>
 
     <name>TreexBuyer</name>
@@ -90,7 +90,12 @@
         <dependency>
             <groupId>com.jodexindustries.jguiwrapper</groupId>
             <artifactId>common</artifactId>
-            <version>1.0.0.6</version>
+            <version>1.0.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jodexindustries.jguiwrapper</groupId>
+            <artifactId>nms</artifactId>
+            <version>1.0.0.7</version>
         </dependency>
         <dependency>
             <groupId>io.papermc.paper</groupId>

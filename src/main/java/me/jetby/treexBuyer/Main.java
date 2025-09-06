@@ -61,7 +61,9 @@ public final class Main extends JavaPlugin {
         Logger.success("Enabling TreexBuyer...");
         INSTANCE = this;
 
-        JGuiInitializer.init(this);
+
+        JGuiInitializer.init(this, false);
+
 
         new Metrics(this, 25141);
 

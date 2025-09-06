@@ -15,8 +15,10 @@ public class Coefficient {
     public double get(Player player, Material material) {
         String key = determineKey(material);
         double playerScore = plugin.getStorage().getScore(player.getUniqueId(), key);
-        double multiplierCount = (playerScore / plugin.getCfg().getScores());
-        double coefficient = plugin.getCfg().getDefaultCoefficient() + multiplierCount * plugin.getCfg().getCoefficient();
+        double multiplierCount = Math.floor(playerScore / plugin.getCfg().getScores());
+        double coefficient = plugin.getCfg().getDefaultCoefficient()
+                + multiplierCount * plugin.getCfg().getCoefficient();
+
         double baseCoefficient = Math.min(coefficient, plugin.getCfg().getMaxCoefficient());
         baseCoefficient = Math.max(baseCoefficient, plugin.getCfg().getDefaultCoefficient());
 
@@ -41,8 +43,10 @@ public class Coefficient {
         Config.ScoreType type = plugin.getCfg().getType();
         String key = type == Config.ScoreType.CATEGORY ? category.toLowerCase() : "global";
         double playerScore = plugin.getStorage().getScore(player.getUniqueId(), key);
-        double multiplierCount = (playerScore / plugin.getCfg().getScores());
-        double coefficient = plugin.getCfg().getDefaultCoefficient() + multiplierCount * plugin.getCfg().getCoefficient();
+        double multiplierCount = Math.floor(playerScore / plugin.getCfg().getScores());
+        double coefficient = plugin.getCfg().getDefaultCoefficient()
+                + multiplierCount * plugin.getCfg().getCoefficient();
+
         double baseCoefficient = Math.min(coefficient, plugin.getCfg().getMaxCoefficient());
         baseCoefficient = Math.max(baseCoefficient, plugin.getCfg().getDefaultCoefficient());
 

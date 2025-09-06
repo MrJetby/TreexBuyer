@@ -225,7 +225,7 @@ public class JGui extends AdvancedGui implements Listener {
                 builder.slots(button.slot());
 
                 // VIEW REQUIREMENTS
-                if (!button.viewRequirements( ).isEmpty( )) {
+                if (!button.viewRequirements().isEmpty()) {
                     for (ViewRequirement requirement : button.viewRequirements( )) {
                         if (!Requirements.check(player, requirement, totalPrice, totalScores, button)) {
                             return;

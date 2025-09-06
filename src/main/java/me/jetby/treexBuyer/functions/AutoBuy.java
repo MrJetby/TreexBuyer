@@ -72,10 +72,10 @@ public class AutoBuy {
             Items.ItemData itemData = plugin.getItems().getItemValues().get(itemStack.getType());
 
             double price = itemData.price() * plugin.getCoefficient().get(player, itemStack.getType());
-            int score = itemData.score();
+            int score = itemData.score() * itemStack.getAmount();
 
 
-            if (player.getEquipment().getItemInOffHand().equals(itemStack)) {
+            if (player.getEquipment().getHelmet() !=null && player.getEquipment().getItemInOffHand().equals(itemStack)) {
                 player.getEquipment().setItemInOffHand(air);
             }
             if (player.getEquipment().getHelmet() != null && player.getEquipment().getHelmet().equals(itemStack)) {
@@ -93,20 +93,16 @@ public class AutoBuy {
 
             player.getInventory().removeItem(itemStack);
 
-
             totalPrice += price * itemStack.getAmount();
-            totalScores += score * itemStack.getAmount();
 
-            if (totalScores > 0) {
+            if (score > 0) {
                 String key = plugin.getCoefficient().determineKey(itemStack.getType());
-                Logger.info(key );
-                plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) + totalScores);
+                plugin.getStorage().setScore(player.getUniqueId(), key, plugin.getStorage().getScore(player.getUniqueId(), key) + score);
             }
         }
 
         if (totalPrice <= 0L) return;
         plugin.getEconomy().depositPlayer(player, totalPrice);
-
 
         List<String> list = getStrings(totalPrice, totalScores);
         ActionExecutor.execute(player, ActionRegistry.transform(list), null);
