@@ -1,30 +1,22 @@
 package me.jetby.treexBuyer.tools;
 
-import lombok.experimental.UtilityClass;
-import me.jetby.treexBuyer.Main;
+import me.jetby.treexBuyer.TreexBuyer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 
-@UtilityClass
-public class FileLoader {
+public final class FileLoader {
 
-    public FileConfiguration getFileConfiguration(String fileName) {
-        File file = new File(Main.getInstance().getDataFolder().getAbsolutePath(), fileName);
-        if (!file.exists()) {
-            Main.getInstance().saveResource(fileName, false);
-
-        }
+    public static FileConfiguration getFileConfiguration(String fileName) {
+        File file = new File(TreexBuyer.getInstance().getDataFolder(), fileName);
+        if (!file.exists()) TreexBuyer.getInstance().saveResource(fileName, false);
         return YamlConfiguration.loadConfiguration(file);
     }
 
-    public File getFile(String fileName) {
-        File file = new File(Main.getInstance().getDataFolder().getAbsoluteFile(), fileName);
-        if (!file.exists()) {
-            Main.getInstance().saveResource(fileName, false);
-        }
+    public static File getFile(String fileName) {
+        File file = new File(TreexBuyer.getInstance().getDataFolder(), fileName);
+        if (!file.exists()) TreexBuyer.getInstance().saveResource(fileName, false);
         return file;
     }
-
 }

@@ -1,0 +1,130 @@
+id: mobs
+title: "<black>Mob Resources"
+size: 54
+
+Items:
+  background:
+    priority: 10
+    material: BLACK_STAINED_GLASS_PANE
+    display_name: " "
+    slots:
+      - '0-17'
+      - '36-52'
+
+  mobs:
+    slots:
+      - '18-35'
+    category: mobs
+    lore:
+      - ''
+      - '<#FB6216> 💰 <white>Base price <gray>$%price%'
+      - '<#FB6216> 💎 <white>With coefficient <#FB6216><bold>$%price_with_coefficient%'
+      - ''
+      - '<dark_gray>───────────────────'
+      - '<gray> 🔄 <white>Auto-sell: %auto_sell_toggle_state%'
+      - '<gray> ❱ <white><underlined>Click to toggle'
+      - ''
+    on_click:
+      any:
+        - '[autobuy_item_toggle]'
+        - '[refresh]'
+
+  menuMine:
+    material: NETHERITE_INGOT
+    priority: 2
+    slot: 3
+    display_name: "<gray>[ <gold>⛏ Mine <gray>]"
+    lore:
+      - ''
+      - ' <gray>Open mine resources'
+      - ''
+    on_click:
+      any:
+        - '[open] mine'
+
+  menuMobs:
+    material: COW_SPAWN_EGG
+    priority: 2
+    enchanted: true
+    slot: 4
+    display_name: "<gray>[ <gold>⚔ Mobs <gray>]"
+    lore:
+      - ''
+      - ' <green>✔ You are here'
+      - ''
+
+  autobuy_toggle_on:
+    material: SNOWBALL
+    enchanted: true
+    slot: 49
+    priority: 1
+    view_requirements:
+      - "%treexbuyer_autobuy% == true"
+    display_name: "<green>⚙ Auto-sell"
+    lore:
+      - ''
+      - ' <gray>Status: <green><bold>✔ Enabled'
+      - ' <gray>❱ Click to disable'
+      - ''
+    on_click:
+      any:
+        - '[autobuy_toggle]'
+        - '[refresh]'
+
+  autobuy_toggle_off:
+    material: SNOWBALL
+    slot: 49
+    priority: 2
+    display_name: "<red>⚙ Auto-sell"
+    lore:
+      - ''
+      - ' <gray>Status: <red><bold>✗ Disabled'
+      - ' <gray>❱ Click to enable'
+      - ''
+    on_click:
+      any:
+        - '[autobuy_toggle]'
+        - '[refresh]'
+
+  disable:
+    material: GRAY_DYE
+    priority: 1
+    slot: 45
+    display_name: '<red><bold>✗ Disable all'
+    lore:
+      - ''
+      - ' <gray>Disable auto-sell'
+      - ' <gray>for all items'
+      - ''
+    on_click:
+      any:
+        - '[disable_all]'
+        - '[refresh]'
+
+  enable:
+    material: LIME_DYE
+    priority: 1
+    slot: 53
+    display_name: '<green><bold>✔ Enable all'
+    lore:
+      - ''
+      - ' <gray>Enable auto-sell'
+      - ' <gray>for all items'
+      - ''
+    on_click:
+      any:
+        - '[enable_all]'
+        - '[refresh]'
+
+  back:
+    material: ARROW
+    priority: 1
+    slot: 1
+    display_name: "<gray>❮ <white>Back"
+    lore:
+      - ''
+      - ' <gray>Go back'
+      - ''
+    on_click:
+      any:
+        - '[open] seller'

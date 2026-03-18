@@ -1,0 +1,47 @@
+storage:
+  # MYSQL, SQLITE, JSON
+  type: "SQLITE"
+  # The settings below are only used for MYSQL
+  host: "localhost"
+  port: 3306
+  database: "treexbuyer"
+  username: "root"
+  password: ""
+
+autobuy:
+  enable: true
+  delay: 60  # In ticks. How often auto-sell triggers. Default 60 = 3 seconds
+  actions:
+    - '[MESSAGE] <green>Auto-sell <gray>» <white>Sold items for <gold>$%sell_pay_commas% <gray>(<yellow>+%sell_score% points<gray>)'
+    - '[SOUND] entity_player_levelup;0.1'
+  disabled-worlds:
+    - duel-1
+    - duel-2
+  status:
+    enable: "<#0DFB00><bold>Enabled"
+    disable: "<#FB0000><bold>Disabled"
+
+
+score-system:
+  # How the coefficient grows
+  # GLOBAL - Same for all items
+  # ITEM - Individual per item
+  # CATEGORY - Individual per category
+  type: CATEGORY
+
+  # Every 1000 points the player gains +0.01 multiplier
+  multiplier-ratio:
+    scores: 1000.0
+    coefficient: 0.01
+
+  # Maximum coefficient (excluding donor boosts)
+  default-coefficient: 1.0
+  max-legal-coefficient: 3.0
+
+  # If true, donor boosts will bypass the max-legal-coefficient value
+  boosters_except_legal_coefficient: true
+
+  booster:
+    donat-1: # name (can be anything)
+      permission: 'buyer.boost.donat1' # permission used to check if the player has this boost
+      external-coefficient: 0.5

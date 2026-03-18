@@ -1,0 +1,147 @@
+####################################################################################################
+#
+# Все команды
+#
+# [MESSAGE] Отправить игроку сообщение
+#
+# [BROADCAST_MESSAGE] Отправить всем сообщение
+#
+# [PLAYER] Выполнить команду от имени игрока
+#
+# [CONSOLE] Выполнять команду от имени консоли
+#
+# [ACTIONBAR] Отправить игроку текст в actionbar
+#
+# [BROADCAST_ACTIONBAR] Отправить всем текст в actionbar
+#
+# [SOUND] Произвести игроку звук
+#
+# [BROADCAST_SOUND] Произвести всем звук
+#
+# [EFFECT] Дать игроку эффект
+#
+# [TITLE] Отправить игроку тайтл, чтобы отправить субтайтл используйте символ ";"
+# Например: [TITLE] First;Second
+#
+# [BROADCAST_TITLE] Отправить всем тайтл
+#
+# [CLOSE] Закрыть меню
+#
+# [OPEN] Открыть меню
+#
+# [AUTOBUY_ITEM_TOGGLE] Переключить предмет из списка предметов авто-скупки
+#
+# [AUTOBUY_TOGGLE] Переключить статус авто-скупки
+#
+# [ENABLE_ALL] Добавить все предметы у которых в текущем гуи есть команда [AUTOBUY_ITEM_TOGGLE] в список предметов авто-скупки
+#
+# [DISABLE_ALL] Убрать все предметы у которых в текущем гуи есть есть команда [AUTOBUY_ITEM_TOGGLE] из списка предметов авто-скупки
+#
+# [SELL_ITEM] <amount>/all
+# Также можно использовать плейсхолдер %item_amount% в проверках _requirements
+#
+# [SELL_ALL] Продать все предметы из sell-slots
+#
+####################################################################################################
+#
+# Типы кликов в onClick
+#
+# any
+# left
+# shift_left
+# right
+# middle
+# shift_right
+# drop
+# control
+# double
+#
+#
+# Типы проверок
+#
+# view_requirements
+#   - "%example% >= 10"
+#   - "%example% == hello"
+#
+####################################################################################################
+#
+# Внутренние плейсхолдеры:
+#
+# %price% - Цена данного предмета (работает только для предметов с секцией category или item)
+# %price_with_coefficient% - Цена если учитывать коэффициент
+# %price_commas%
+# %price_with_coefficient_commas%
+# %coefficient%
+# %score%
+# %score_commas%
+# %sell_pay% - Цена всех предметов для продажи
+# %sell_pay_commas%
+# %sell_score% - Очки всех предметов которые получит игрок из продажи
+# %sell_score_commas%
+# %autobuy_item_status% - Входит ли данные предмет в список авто скупки
+# %autobuy_status% - Статус авто скупки
+#
+####################################################################################################
+#
+# Документация https://wiki.jetby.space
+# Нужна помощь, или нашли баг? Обращайтесь к нам https://help.jetby.space
+#
+####################################################################################################
+
+id: seller
+
+title: "<black>Скупщик"
+command:
+  - 'seller'
+  - 'buyer'
+
+
+size: 54
+
+sell-slots:
+  - '0-44'
+
+Items:
+
+  background:
+    material: BLACK_STAINED_GLASS_PANE
+    slots:
+      - '46-52'
+    display_name: ' '
+
+  sell:
+    material: LIME_DYE
+    slot: 53
+    display_name: ' '
+    lore:
+      - ' <white>Нажмите чтобы сдать все предметы '
+      - ' <white>Предметов на сумму: <gray>$%sell_pay_commas% <white>и <yellow>%sell_score_commas% <white>очков '
+      - ''
+    on_click:
+      any:
+#        - '[message] Да, вы можете использовать как обычные, так и проверочные команды'
+        - check1:
+            if: "%sell_pay% > 0"
+            then:
+              - '[sell_all]'
+              - '[message] <white>Продано предметов на сумму <red>%sell_pay_commas% <white>и получено очков <yellow>%sell_score_commas%'
+              - '[sound] entity.player.levelup'
+            else:
+              - '[sound] block.dripstone_block.break'
+              - '[message] <gray>Nothing to sell'
+  category:
+    material: MINECART
+    slot: 45
+    display_name: ' '
+    lore:
+      - ' <white>Текущий коэффицент: <red>x%coefficient%'
+      - ' <white>Очков: <red>%score%'
+      - '  '
+      - ' <gradient:#E8A309:#EFCF48>Нажмите, чтобы настроить авто скупку</gradient> '
+      - ' '
+    on_click:
+      any:
+        - '[open] mine'
+
+
+

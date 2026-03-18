@@ -1,0 +1,23 @@
+
+id: donutsmp
+
+title: "<black>Положите сюда предметы на продажу"
+
+size: 54
+
+sell-slots:
+  - '0-53'
+
+
+on_close:
+  - check1:
+      if: "%sell_pay% > 0"
+      then:
+        - '[sell_all]'
+        - '[message] <white>Продано предметов на сумму <red>%sell_pay% <white>и получено очков <yellow>%sell_score%'
+        - '[sound] entity.player.levelup'
+      else:
+        - '[sound] block.dripstone_block.break'
+        - '[message] <gray>Nothing to sell'
+
+Items: []

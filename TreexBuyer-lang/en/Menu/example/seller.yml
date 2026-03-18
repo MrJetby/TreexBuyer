@@ -1,0 +1,143 @@
+####################################################################################################
+#
+# All actions
+#
+# [MESSAGE] Send a message to the player
+#
+# [BROADCAST_MESSAGE] Send a message to everyone
+#
+# [PLAYER] Execute a command as the player
+#
+# [CONSOLE] Execute a command as the console
+#
+# [ACTIONBAR] Send an actionbar message to the player
+#
+# [BROADCAST_ACTIONBAR] Send an actionbar message to everyone
+#
+# [SOUND] Play a sound to the player
+#
+# [BROADCAST_SOUND] Play a sound to everyone
+#
+# [EFFECT] Give a potion effect to the player
+#
+# [TITLE] Send a title to the player. Use ";" for subtitle
+# Example: [TITLE] First;Second
+#
+# [BROADCAST_TITLE] Send a title to everyone
+#
+# [CLOSE] Close the menu
+#
+# [OPEN] Open a menu
+#
+# [AUTOBUY_ITEM_TOGGLE] Toggle an item in the auto-sell list
+#
+# [AUTOBUY_TOGGLE] Toggle auto-sell status
+#
+# [ENABLE_ALL] Add all items that have [AUTOBUY_ITEM_TOGGLE] in this GUI to the auto-sell list
+#
+# [DISABLE_ALL] Remove all items that have [AUTOBUY_ITEM_TOGGLE] in this GUI from the auto-sell list
+#
+# [SELL_ITEM] <amount>/all
+# You can also use the %item_amount% placeholder in requirements
+#
+# [SELL_ALL] Sell all items from sell-slots
+#
+####################################################################################################
+#
+# Click types in onClick
+#
+# any
+# left
+# shift_left
+# right
+# middle
+# shift_right
+# drop
+# control
+# double
+#
+#
+# Requirement types
+#
+# view_requirements
+#   - "%example% >= 10"
+#   - "%example% == hello"
+#
+####################################################################################################
+#
+# Internal placeholders:
+#
+# %price% - Price of this item (works only for items with a category or item section)
+# %price_with_coefficient% - Price including the coefficient
+# %price_commas%
+# %price_with_coefficient_commas%
+# %coefficient%
+# %score%
+# %score_commas%
+# %sell_pay% - Total price of all items in sell slots
+# %sell_pay_commas%
+# %sell_score% - Total score the player will earn from selling
+# %sell_score_commas%
+# %autobuy_item_status% - Whether this item is in the auto-sell list
+# %autobuy_status% - Auto-sell status
+#
+####################################################################################################
+#
+# Documentation https://wiki.jetby.space
+# Need help or found a bug? Contact us at https://help.jetby.space
+#
+####################################################################################################
+
+id: seller
+
+title: "<black>Seller"
+command:
+  - 'seller'
+  - 'buyer'
+
+size: 54
+
+sell-slots:
+  - '0-44'
+
+Items:
+
+  background:
+    material: BLACK_STAINED_GLASS_PANE
+    slots:
+      - '46-52'
+    display_name: ' '
+
+  sell:
+    material: LIME_DYE
+    slot: 53
+    display_name: ' '
+    lore:
+      - ' <white>Click to sell all items '
+      - ' <white>Items worth: <gray>$%sell_pay_commas% <white>and <yellow>%sell_score_commas% <white>points '
+      - ''
+    on_click:
+      any:
+        - check1:
+            if: "%sell_pay% > 0"
+            then:
+              - '[sell_all]'
+              - '[message] <white>Sold items for <red>$%sell_pay_commas% <white>and earned <yellow>%sell_score_commas% points'
+              - '[sound] entity.player.levelup'
+            else:
+              - '[sound] block.dripstone_block.break'
+              - '[message] <gray>Nothing to sell'
+
+  category:
+    material: MINECART
+    slot: 45
+    display_name: ' '
+    lore:
+      - ' <white>Current coefficient: <red>x%coefficient%'
+      - ' <white>Points: <red>%score%'
+      - '  '
+      - ' <gradient:#E8A309:#EFCF48>Click to configure auto-sell</gradient> '
+      - ' '
+    on_click:
+      any:
+        - '[open] mine'

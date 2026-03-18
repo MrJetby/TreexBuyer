@@ -2,100 +2,78 @@ package me.jetby.treexBuyer.configurations;
 
 import lombok.Getter;
 import me.jetby.treexBuyer.functions.Boost;
+import me.jetby.treexBuyer.modules.UserData;
+import me.jetby.treexBuyer.storage.score.Score;
+import me.jetby.treexBuyer.storage.score.ScoreType;
+import me.jetby.treexBuyer.storage.score.types.CategoryScore;
 import me.jetby.treexBuyer.tools.FileLoader;
-import me.jetby.treexBuyer.tools.TextUtil;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 public class Config {
 
-    String storageType;
-    boolean isYamlOrJsonForceSave;
-
-    ScoreType type;
-    int scores;
-    double coefficient;
-    int maxCoefficient;
-    int defaultCoefficient;
-    boolean boosters_except_legal_coefficient;
-
-    String enable;
-    String disable;
-
-    String host;
-    int port;
-    String database;
-    String username;
-    String password;
-
-    String itemsPrices;
-
-    int autoBuyDelay;
-    List<String> autoBuyActions;
-    List<String> disabledWorlds;
-
+    private String storageType;
+    private ScoreType type;
+    private double scores;
+    private double coefficient;
+    private double maxCoefficient;
+    private double defaultCoefficient;
+    private boolean boosters_except_legal_coefficient;
+    private String enable;
+    private String disable;
+    private String host;
+    private int port;
+    private String database;
+    private String username;
+    private String password;
+    private String itemsPrices;
+    private int autoBuyDelay;
+    private List<String> autoBuyActions;
+    private List<String> disabledWorlds;
     private final Map<String, Boost> boosts = new HashMap<>();
 
     public void load() {
-        FileConfiguration configuration = FileLoader.getFileConfiguration("config.yml");
+        FileConfiguration cfg = FileLoader.getFileConfiguration("config.yml");
 
-        storageType = configuration.getString("storage.type", "yaml").toUpperCase();
-        isYamlOrJsonForceSave = configuration.getBoolean("storage.yaml-or-json-force-save", false);
+        storageType            = cfg.getString("storage.type", "yaml").toUpperCase();
+        host                   = cfg.getString("storage.host");
+        port                   = cfg.getInt("storage.port");
+        database               = cfg.getString("storage.database");
+        username               = cfg.getString("storage.username");
+        password               = cfg.getString("storage.password");
+        autoBuyDelay           = cfg.getInt("autobuy.delay", 60);
+        autoBuyActions         = cfg.getStringList("autobuy.actions");
+        disabledWorlds         = cfg.getStringList("autobuy.disabled-worlds");
+        enable                 = cfg.getString("autobuy.status.enable", "<green>Включён");
+        disable                = cfg.getString("autobuy.status.disable", "<red>Выключен");
 
+        ConfigurationSection ss = cfg.getConfigurationSection("score-system");
+        if (ss == null) ss = cfg.createSection("score-system");
 
-        host = configuration.getString("storage.host");
-        port = configuration.getInt("storage.port");
-        database = configuration.getString("storage.database");
-        username = configuration.getString("storage.username");
-        password = configuration.getString("storage.password");
+        type                              = ScoreType.valueOf(ss.getString("type", "GLOBAL").toUpperCase());
+        scores                            = ss.getInt("multiplier-ratio.scores", 100);
+        coefficient                       = ss.getDouble("multiplier-ratio.coefficient", 0.01);
+        maxCoefficient                    = ss.getDouble("max-legal-coefficient", 3);
+        defaultCoefficient                = ss.getDouble("default-coefficient", 1);
+        boosters_except_legal_coefficient = ss.getBoolean("boosters_except_legal_coefficient", false);
 
-        autoBuyDelay = configuration.getInt("autobuy.delay", 60);
-        autoBuyActions = TextUtil.colorize(configuration.getStringList("autobuy.actions"));
-        disabledWorlds = configuration.getStringList("autobuy.disabled-worlds");
-        enable = TextUtil.colorize(configuration.getString("autobuy.status.enable", "&aВключён"));
-        disable = TextUtil.colorize(configuration.getString("autobuy.status.disable", "&cВыключен"));
-
-        ConfigurationSection scoreSystem = configuration.getConfigurationSection("score-system");
-        if (scoreSystem==null) {
-            configuration.createSection("score-system");
-            scoreSystem.set("type", "GLOBAL");
-            scoreSystem.set("multiplier-ratio.scores", 100);
-            scoreSystem.set("multiplier-ratio.coefficient", 0.01);
-            scoreSystem.set("max-legal-coefficient", 3);
-            scoreSystem.set("default-coefficient", 1);
-            scoreSystem.set("boosters_except_legal_coefficient", false);
-
-        }
-        type = ScoreType.valueOf(scoreSystem.getString("type", "GLOBAL").toUpperCase());
-        scores = scoreSystem.getInt("multiplier-ratio.scores", 100);
-        coefficient = scoreSystem.getDouble("multiplier-ratio.coefficient", 0.01);
-        maxCoefficient = scoreSystem.getInt("max-legal-coefficient", 3);
-        defaultCoefficient = scoreSystem.getInt("default-coefficient", 1);
-        boosters_except_legal_coefficient = scoreSystem.getBoolean("boosters_except_legal_coefficient", false);
-
-        loadBoosts(configuration);
-
-        itemsPrices = configuration.getString("items-prices-file", "prices.yml");
-
+        itemsPrices = cfg.getString("items-prices-file", "prices.yml");
+        loadBoosts(cfg);
     }
 
-    public void loadBoosts(FileConfiguration configuration) {
+    public void loadBoosts(FileConfiguration cfg) {
         boosts.clear();
-        ConfigurationSection boosterSection = configuration.getConfigurationSection("booster");
-        if (boosterSection != null) {
-            for (String key : boosterSection.getKeys(false)) {
-                String permission = boosterSection.getString(key + ".permission");
-                double coefficient = boosterSection.getDouble(key + ".external-coefficient", 0.0);
-                boosts.put(key, new Boost(key, permission, coefficient));
-            }
+        ConfigurationSection boosterSection = cfg.getConfigurationSection("booster");
+        if (boosterSection == null) return;
+        for (String key : boosterSection.getKeys(false)) {
+            String permission = boosterSection.getString(key + ".permission");
+            double coeff = boosterSection.getDouble(key + ".external-coefficient", 0.0);
+            boosts.put(key, new Boost(key, permission, coeff));
         }
-    }
-    public enum ScoreType {
-        GLOBAL, ITEM, CATEGORY
     }
 }

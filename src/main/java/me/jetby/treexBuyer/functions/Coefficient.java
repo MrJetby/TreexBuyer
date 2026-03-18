@@ -1,84 +1,71 @@
 package me.jetby.treexBuyer.functions;
 
-import lombok.RequiredArgsConstructor;
-import me.jetby.treexBuyer.Main;
-import me.jetby.treexBuyer.configurations.Config;
+import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.configurations.Items;
+import me.jetby.treexBuyer.modules.UserData;
+import me.jetby.treexBuyer.storage.score.Score;
+import me.jetby.treexBuyer.storage.score.types.CategoryScore;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-@RequiredArgsConstructor
+import java.util.HashSet;
+import java.util.Set;
+
 public class Coefficient {
 
-    final Main plugin;
+    final TreexBuyer plugin;
 
-    public double get(Player player, Material material) {
-        String key = determineKey(material);
-        double playerScore = plugin.getStorage().getScore(player.getUniqueId(), key);
-        double multiplierCount = Math.floor(playerScore / plugin.getCfg().getScores());
-        double coefficient = plugin.getCfg().getDefaultCoefficient()
-                + multiplierCount * plugin.getCfg().getCoefficient();
-
-        double baseCoefficient = Math.min(coefficient, plugin.getCfg().getMaxCoefficient());
-        baseCoefficient = Math.max(baseCoefficient, plugin.getCfg().getDefaultCoefficient());
-
-        double boosterCoefficient = 0.0;
-        for (Boost boost : plugin.getCfg().getBoosts().values()) {
-            if (boost.permission() != null && player.hasPermission(boost.permission())) {
-                boosterCoefficient += boost.coefficient();
-            }
-        }
-
-        if (plugin.getCfg().isBoosters_except_legal_coefficient()) {
-            return round(baseCoefficient + boosterCoefficient);
-        } else {
-            return round(Math.min(baseCoefficient + boosterCoefficient, plugin.getCfg().getMaxCoefficient()));
-        }
+    public Coefficient(TreexBuyer plugin) {
+        this.plugin = plugin;
     }
 
-    public double getByCategory(Player player, String category) {
-        if (category == null || category.isEmpty()) {
-            return get(player, null);
-        }
-        Config.ScoreType type = plugin.getCfg().getType();
-        String key = type == Config.ScoreType.CATEGORY ? category.toLowerCase() : "global";
-        double playerScore = plugin.getStorage().getScore(player.getUniqueId(), key);
-        double multiplierCount = Math.floor(playerScore / plugin.getCfg().getScores());
-        double coefficient = plugin.getCfg().getDefaultCoefficient()
-                + multiplierCount * plugin.getCfg().getCoefficient();
+    public double getResult(Player player, Score score) {
+        double earned = score.getTotal() / plugin.getCfg().getScores() * plugin.getCfg().getCoefficient();
+        double base = plugin.getCfg().getDefaultCoefficient() + earned;
+        double legal = Math.min(base, plugin.getCfg().getMaxCoefficient());
+        double boost = plugin.getCfg().getBoosts().values().stream()
+                .filter(b -> b.permission() != null && player.hasPermission(b.permission()))
+                .mapToDouble(Boost::coefficient)
+                .sum();
 
-        double baseCoefficient = Math.min(coefficient, plugin.getCfg().getMaxCoefficient());
-        baseCoefficient = Math.max(baseCoefficient, plugin.getCfg().getDefaultCoefficient());
-
-        double boosterCoefficient = 0.0;
-        for (Boost boost : plugin.getCfg().getBoosts().values()) {
-            if (boost.permission() != null && player.hasPermission(boost.permission())) {
-                boosterCoefficient += boost.coefficient();
-            }
-        }
-
-        if (plugin.getCfg().isBoosters_except_legal_coefficient()) {
-            return round(baseCoefficient + boosterCoefficient);
-        } else {
-            return round(Math.min(baseCoefficient + boosterCoefficient, plugin.getCfg().getMaxCoefficient()));
-        }
+        return plugin.getCfg().isBoosters_except_legal_coefficient()
+                ? legal + boost
+                : Math.min(base + boost, plugin.getCfg().getMaxCoefficient());
     }
-    final Items.ItemData defaultData = new Items.ItemData(0,0,"uncategorized");
+    public double getTotalCoefficientByCategory(Player player, String category) {
+        UserData user = UserData.findByUuid(player.getUniqueId());
+        if (user == null || !(user.getScore() instanceof CategoryScore)) return 0.0;
 
-    public String determineKey(Material material) {
-        Config.ScoreType type = plugin.getCfg().getType();
-        if (type == Config.ScoreType.GLOBAL) return "global";
-        if (type == Config.ScoreType.ITEM) return material.name().toLowerCase();
-        if (type == Config.ScoreType.CATEGORY) {
-            String category = plugin.getItems().getItemValues().getOrDefault(material, defaultData).category();
-            return category != null ? category.toLowerCase() : "uncategorized";
-        }
-        throw new IllegalStateException("Unknown score type");
+        Set<Material> materials = new HashSet<>();
+        plugin.getItems().getCategories().forEach((mat, cat) -> {
+            if (cat.equalsIgnoreCase(category)) materials.add(mat);
+        });
+
+        return materials.stream().mapToDouble(mat -> getResult(player, user.getScore())).sum();
     }
 
+    public double getPrice(Player player, Material material) {
+        if (!plugin.getItems().getItemValues().containsKey(material)) return 0.0;
+        UserData user = UserData.findByUuid(player.getUniqueId());
+        if (user == null) return 0.0;
+        return plugin.getItems().getItemValues().get(material).price() * plugin.getCoefficient().getResult(player, user.getScore());
+    }
+
+    public double getTotalScoreByCategory(Player player, String category) {
+        UserData user = UserData.findByUuid(player.getUniqueId());
+        if (user == null || !(user.getScore() instanceof CategoryScore cs)) return 0.0;
+
+        Set<Material> mats = new HashSet<>();
+        plugin.getItems().getCategories().forEach((mat, cat) -> { if (cat.equalsIgnoreCase(category)) mats.add(mat); });
+        return mats.stream().mapToDouble(cs::get).sum();
+    }
+
+    public double getItemScore(Material material) {
+        Items.ItemData data = plugin.getItems().getItemValues().get(material);
+        return data == null ? 0.0 : data.score();
+    }
     double round(double value) {
         double scale = Math.pow(10, 2);
         return Math.round(value * scale) / scale;
     }
-
 }

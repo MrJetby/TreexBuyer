@@ -1,0 +1,130 @@
+id: mobs
+title: "<black>Ресурсы с шахты"
+size: 54
+
+Items:
+  background:
+    priority: 10
+    material: BLACK_STAINED_GLASS_PANE
+    display_name: " "
+    slots:
+      - '0-17'
+      - '36-52'
+
+  mobs:
+    slots:
+      - '18-35'
+    category: mobs
+    lore:
+      - ''
+      - '<#FB6216> 💰 <white>Базовая цена <gray>$%price%'
+      - '<#FB6216> 💎 <white>С коэффициентом <#FB6216><bold>$%price_with_coefficient%'
+      - ''
+      - '<dark_gray>───────────────────'
+      - '<gray> 🔄 <white>Авто-скупка: %auto_sell_toggle_state%'
+      - '<gray> ❱ <white><underlined>Нажмите чтобы переключить'
+      - ''
+    on_click:
+      any:
+        - '[autobuy_item_toggle]'
+        - '[refresh]'
+
+  menuMine:
+    material: NETHERITE_INGOT
+    priority: 2
+    slot: 3
+    display_name: "<gray>[ <gold>⛏ Шахта <gray>]"
+    lore:
+      - ''
+      - ' <gray>Открыть ресурсы шахты'
+      - ''
+    on_click:
+      any:
+        - '[open] mine'
+
+  menuMobs:
+    material: COW_SPAWN_EGG
+    priority: 2
+    enchanted: true
+    slot: 4
+    display_name: "<gray>[ <gold>⚔ Мобы <gray>]"
+    lore:
+      - ''
+      - ' <green>✔ Вы здесь'
+      - ''
+
+  autobuy_toggle_on:
+    material: SNOWBALL
+    enchanted: true
+    slot: 49
+    priority: 1
+    view_requirements:
+      - "%treexbuyer_autobuy% == true"
+    display_name: "<green>⚙ Авто-скупка"
+    lore:
+      - ''
+      - ' <gray>Статус: <green><bold>✔ Включена'
+      - ' <gray>❱ Нажмите чтобы выключить'
+      - ''
+    on_click:
+      any:
+        - '[autobuy_toggle]'
+        - '[refresh]'
+
+  autobuy_toggle_off:
+    material: SNOWBALL
+    slot: 49
+    priority: 2
+    display_name: "<red>⚙ Авто-скупка"
+    lore:
+      - ''
+      - ' <gray>Статус: <red><bold>✗ Выключена'
+      - ' <gray>❱ Нажмите чтобы включить'
+      - ''
+    on_click:
+      any:
+        - '[autobuy_toggle]'
+        - '[refresh]'
+
+  disable:
+    material: GRAY_DYE
+    priority: 1
+    slot: 45
+    display_name: '<red><bold>✗ Выключить всё'
+    lore:
+      - ''
+      - ' <gray>Отключить авто-скупку'
+      - ' <gray>для всех предметов'
+      - ''
+    on_click:
+      any:
+        - '[disable_all]'
+        - '[refresh]'
+
+  enable:
+    material: LIME_DYE
+    priority: 1
+    slot: 53
+    display_name: '<green><bold>✔ Включить всё'
+    lore:
+      - ''
+      - ' <gray>Включить авто-скупку'
+      - ' <gray>для всех предметов'
+      - ''
+    on_click:
+      any:
+        - '[enable_all]'
+        - '[refresh]'
+
+  back:
+    material: ARROW
+    priority: 1
+    slot: 1
+    display_name: "<gray>❮ <white>Назад"
+    lore:
+      - ''
+      - ' <gray>Вернуться назад'
+      - ''
+    on_click:
+      any:
+        - '[open] seller'

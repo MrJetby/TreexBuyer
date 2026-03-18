@@ -1,10 +1,12 @@
 name: TreexBuyer
-version: '3.1'
-main: me.jetby.treexBuyer.Main
-api-version: '1.16'
+version: ${project.version}
+main: me.jetby.treexBuyer.TreexBuyer
+api-version: '1.20'
 load: POSTWORLD
 authors: [ MrJetby ]
-website: https://dsc.gg/treexstudio
+website: https://jetby.space
+depend:
+  - Libb
 softdepend:
   - PlaceholderAPI
   - Vault

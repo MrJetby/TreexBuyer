@@ -1,0 +1,49 @@
+storage:
+  # MYSQL, SQLITE, JSON
+  type: "SQLITE"
+  # Данные ниже используются только для MYSQL
+  host: "localhost"
+  port: 3306
+  database: "treexbuyer"
+  username: "root"
+  password: ""
+
+autobuy:
+  enable: true
+  delay: 60  # В тиках. Как часто будет срабатывать АвтоСкупка. По умолчанию 60 - 3 секунды
+  actions:
+    - '[MESSAGE] <green>Авто-скупка <gray>» <white>Продано предметов на сумму <gold>$%sell_pay_commas% <gray>(<yellow>+%sell_score% очков<gray>)'
+    - '[SOUND] entity_player_levelup;0.1'
+  disabled-worlds:
+    - duel-1
+    - duel-2
+  status:
+    enable: "<#0DFB00><bold>Включён"
+    disable: "<#FB0000><bold>Выключен"
+
+
+score-system:
+  # Как будет расти Коэффициент
+  # GLOBAL - На все предметы сразу
+  # ITEM - Для каждого предмета свой
+  # CATEGORY - Для каждой категории свой
+  type: CATEGORY
+
+
+  # Каждые 100 очков юзеру прибавляется +0.01 множителя
+  multiplier-ratio:
+    scores: 1000.0
+    coefficient: 0.01
+
+  # максимальный коэффициент (без учёта донатных бустов)
+  default-coefficient: 1.0
+  max-legal-coefficient: 3.0
+
+  # если true, донатные бусты будут обходить значение в max-legal-coefficient
+  boosters_except_legal_coefficient: true
+
+  booster:
+    donat-1: # имя (может быть любым)
+      permission: 'buyer.boost.donat1' # (пермишен по которому будет определяться наличие буста)
+      external-coefficient: 0.5
+
