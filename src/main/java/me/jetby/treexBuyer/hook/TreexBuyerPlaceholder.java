@@ -25,12 +25,25 @@ public class TreexBuyerPlaceholder extends PlaceholderExpansion {
             plugin.setTreexBuyerPlaceholder(this);
             plugin.getTreexBuyerPlaceholder().register();
         }
-        return;
     }
 
-    @NotNull @Override public String getIdentifier() { return "treexbuyer"; }
-    @NotNull @Override public String getAuthor() { return String.join(", ", plugin.getDescription().getAuthors()); }
-    @NotNull @Override public String getVersion() { return plugin.getDescription().getVersion(); }
+    @NotNull
+    @Override
+    public String getIdentifier() {
+        return "treexbuyer";
+    }
+
+    @NotNull
+    @Override
+    public String getAuthor() {
+        return String.join(", ", plugin.getDescription().getAuthors());
+    }
+
+    @NotNull
+    @Override
+    public String getVersion() {
+        return plugin.getDescription().getVersion();
+    }
 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String params) {

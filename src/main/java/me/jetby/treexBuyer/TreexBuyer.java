@@ -10,6 +10,7 @@ import me.jetby.treexBuyer.configurations.GuiLoader;
 import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.functions.AutoBuy;
 import me.jetby.treexBuyer.functions.Coefficient;
+import me.jetby.treexBuyer.hook.TreexBuyerPlaceholder;
 import me.jetby.treexBuyer.hook.Vault;
 import me.jetby.treexBuyer.menus.BuyerGui;
 import me.jetby.treexBuyer.menus.actions.*;
@@ -17,7 +18,6 @@ import me.jetby.treexBuyer.modules.UserData;
 import me.jetby.treexBuyer.storage.*;
 import me.jetby.treexBuyer.tools.Logger;
 import me.jetby.treexBuyer.tools.Metrics;
-import me.jetby.treexBuyer.hook.TreexBuyerPlaceholder;
 import me.jetby.treexBuyer.tools.Version;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
@@ -26,7 +26,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
@@ -48,7 +47,8 @@ public final class TreexBuyer extends JavaPlugin {
     private Items items;
     private Coefficient coefficient;
     private AutoBuy autoBuy;
-    @Getter @Setter
+    @Getter
+    @Setter
     private TreexBuyerPlaceholder treexBuyerPlaceholder;
 
     public static final MiniMessage MM = MiniMessage.miniMessage();
@@ -63,7 +63,8 @@ public final class TreexBuyer extends JavaPlugin {
         for (String str : version.getAlert()) {
             Logger.success(str);
         }
-        if (Vault.setupEconomy(this)==null) return;
+        this.economy = Vault.setupEconomy(this);
+        if (economy == null) return;
         Logger.success("Enabling TreexBuyer...");
         new Metrics(this, 25141);
         cfg = new Config();

@@ -5,7 +5,6 @@ import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.menus.BuyerGui;
 import me.jetby.treexBuyer.modules.UserData;
 import me.jetby.treexBuyer.tools.Logger;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;

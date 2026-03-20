@@ -32,6 +32,7 @@ public class Coefficient {
                 ? legal + boost
                 : Math.min(base + boost, plugin.getCfg().getMaxCoefficient());
     }
+
     public double getTotalCoefficientByCategory(Player player, String category) {
         UserData user = UserData.findByUuid(player.getUniqueId());
         if (user == null || !(user.getScore() instanceof CategoryScore)) return 0.0;
@@ -56,7 +57,9 @@ public class Coefficient {
         if (user == null || !(user.getScore() instanceof CategoryScore cs)) return 0.0;
 
         Set<Material> mats = new HashSet<>();
-        plugin.getItems().getCategories().forEach((mat, cat) -> { if (cat.equalsIgnoreCase(category)) mats.add(mat); });
+        plugin.getItems().getCategories().forEach((mat, cat) -> {
+            if (cat.equalsIgnoreCase(category)) mats.add(mat);
+        });
         return mats.stream().mapToDouble(cs::get).sum();
     }
 
@@ -64,6 +67,7 @@ public class Coefficient {
         Items.ItemData data = plugin.getItems().getItemValues().get(material);
         return data == null ? 0.0 : data.score();
     }
+
     double round(double value) {
         double scale = Math.pow(10, 2);
         return Math.round(value * scale) / scale;

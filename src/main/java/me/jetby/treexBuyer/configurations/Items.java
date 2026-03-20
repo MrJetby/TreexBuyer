@@ -2,16 +2,15 @@ package me.jetby.treexBuyer.configurations;
 
 import lombok.Getter;
 import me.jetby.treexBuyer.TreexBuyer;
-import me.jetby.treexBuyer.modules.UserData;
 import me.jetby.treexBuyer.storage.score.Score;
-import me.jetby.treexBuyer.storage.score.types.CategoryScore;
 import me.jetby.treexBuyer.tools.FileLoader;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Getter
 public class Items {
@@ -71,5 +70,6 @@ public class Items {
         return plugin.getCfg().getType().createScore(categories);
     }
 
-    public record ItemData(double price, double score, String category) {}
+    public record ItemData(double price, double score, String category) {
+    }
 }

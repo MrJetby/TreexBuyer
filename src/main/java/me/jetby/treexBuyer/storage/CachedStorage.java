@@ -1,13 +1,12 @@
-
 package me.jetby.treexBuyer.storage;
 
-import java.util.UUID;
 import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.modules.UserData;
-import me.jetby.treexBuyer.storage.Storage;
+
+import java.util.UUID;
 
 public abstract class CachedStorage
-implements Storage {
+        implements Storage {
     protected final TreexBuyer plugin;
 
     public CachedStorage(TreexBuyer plugin) {

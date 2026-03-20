@@ -75,7 +75,9 @@ public class SqliteStorage extends CachedStorage {
                 writeUser(uuid, data.isAutoBuy(), autoBuyJson, scoresJson));
     }
 
-    /** Synchronous save — used during shutdown when the Bukkit scheduler is unavailable. */
+    /**
+     * Synchronous save — used during shutdown when the Bukkit scheduler is unavailable.
+     */
     private void saveUserSync(UUID uuid) {
         UserData data = UserData.USERDATA_LIST.get(uuid);
         if (data == null) return;
@@ -122,7 +124,8 @@ public class SqliteStorage extends CachedStorage {
             for (String s : gson.fromJson(autoBuyJson, String[].class)) {
                 try {
                     data.addAutoBuyMaterial(Material.valueOf(s));
-                } catch (IllegalArgumentException ignored) {}
+                } catch (IllegalArgumentException ignored) {
+                }
             }
         }
 

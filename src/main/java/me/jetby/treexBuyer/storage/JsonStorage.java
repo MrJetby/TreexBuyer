@@ -1,6 +1,9 @@
 package me.jetby.treexBuyer.storage;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.modules.UserData;
 import org.bukkit.Material;
@@ -58,7 +61,8 @@ public class JsonStorage extends CachedStorage {
             obj.getAsJsonArray("autoBuyItems").forEach(e -> {
                 try {
                     data.addAutoBuyMaterial(Material.valueOf(e.getAsString()));
-                } catch (IllegalArgumentException ignored) {}
+                } catch (IllegalArgumentException ignored) {
+                }
             });
 
             plugin.getLogger().info("[DEBUG] scores json: " + obj.get("scores"));

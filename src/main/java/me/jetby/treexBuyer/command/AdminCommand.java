@@ -46,9 +46,9 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         if (args.length == 0) return true;
 
         switch (args[0].toLowerCase()) {
-            case "open"   -> handleOpen(sender, args);
+            case "open" -> handleOpen(sender, args);
             case "reload" -> reload(sender);
-            case "score"  -> {
+            case "score" -> {
                 if (args.length < 2) {
                     sender.sendMessage(MM.deserialize("<#EF473A>Usage: /treexbuyer score <give/take/set> <player> [key] <amount>"));
                 } else {
@@ -117,8 +117,9 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         String amountStr = scoreType == ScoreType.GLOBAL ? args[3] : args[4];
 
         if (scoreType == ScoreType.ITEM) {
-            try { Material.valueOf(key.toUpperCase()); }
-            catch (IllegalArgumentException e) {
+            try {
+                Material.valueOf(key.toUpperCase());
+            } catch (IllegalArgumentException e) {
                 sender.sendMessage(MM.deserialize("<#EF473A>Invalid material: " + key));
                 return;
             }

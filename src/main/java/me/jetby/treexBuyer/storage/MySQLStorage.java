@@ -8,7 +8,6 @@ import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.modules.UserData;
 import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.Material;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
@@ -63,7 +62,7 @@ public class MySQLStorage
     @NotNull
     public UserData loadUser(UUID uuid) {
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM userdata WHERE uuid = ?");) {
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM userdata WHERE uuid = ?")) {
             ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
             if (!rs.next()) return new UserData(uuid, plugin.getItems().createScore());
@@ -84,7 +83,9 @@ public class MySQLStorage
                 writeUser(uuid, data.isAutoBuy(), autoBuyJson, scoresJson));
     }
 
-    /** Synchronous save — used during shutdown when the Bukkit scheduler is unavailable. */
+    /**
+     * Synchronous save — used during shutdown when the Bukkit scheduler is unavailable.
+     */
     private void saveUserSync(UUID uuid) {
         UserData data = UserData.USERDATA_LIST.get(uuid);
         if (data == null) return;
@@ -115,11 +116,11 @@ public class MySQLStorage
         UserData.USERDATA_LIST.remove(uuid);
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             try (Connection conn = dataSource.getConnection();
-                 PreparedStatement ps = conn.prepareStatement("DELETE FROM userdata WHERE uuid = ?");) {
+                 PreparedStatement ps = conn.prepareStatement("DELETE FROM userdata WHERE uuid = ?")) {
                 ps.setString(1, uuid.toString());
                 ps.executeUpdate();
             } catch (SQLException e) {
-               Logger.warn("Failed to delete user " + uuid + ": " + e.getMessage());
+                Logger.warn("Failed to delete user " + uuid + ": " + e.getMessage());
             }
         });
     }
@@ -133,14 +134,14 @@ public class MySQLStorage
         if (autoBuyJson != null) {
             for (String s : gson.fromJson(autoBuyJson, String[].class)) {
                 try {
-                    data.addAutoBuyMaterial(Material.valueOf( s));
+                    data.addAutoBuyMaterial(Material.valueOf(s));
                 } catch (IllegalArgumentException illegalArgumentException) {
                     // empty catch block
                 }
             }
         }
         if ((scoresJson = rs.getString("scores")) != null) {
-            data.getScore().fromJson(JsonParser.parseString( scoresJson));
+            data.getScore().fromJson(JsonParser.parseString(scoresJson));
         }
         return data;
     }
@@ -148,7 +149,7 @@ public class MySQLStorage
     private void createTable() {
         String sql = "CREATE TABLE IF NOT EXISTS userdata (uuid VARCHAR(36) PRIMARY KEY,auto_buy BOOLEAN DEFAULT FALSE,coefficient DOUBLE DEFAULT 0.0,auto_buy_items TEXT DEFAULT '[]',scores TEXT DEFAULT '{}')";
         try (Connection conn = this.dataSource.getConnection();
-             Statement stmt = conn.createStatement();) {
+             Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         } catch (SQLException e) {
             Logger.warn("Failed to create table: " + e.getMessage());

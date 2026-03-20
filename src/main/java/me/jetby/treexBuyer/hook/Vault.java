@@ -1,13 +1,13 @@
 package me.jetby.treexBuyer.hook;
 
+import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.tools.Logger;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class Vault {
-    public static Economy setupEconomy(JavaPlugin plugin) {
+    public static Economy setupEconomy(TreexBuyer plugin) {
         if (Bukkit.getServer().getPluginManager().getPlugin("Vault") == null) {
             Logger.error("Vault was not found! Disabling plugin.");
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);

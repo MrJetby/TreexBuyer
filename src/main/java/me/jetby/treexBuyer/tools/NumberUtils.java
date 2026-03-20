@@ -15,6 +15,7 @@ public class NumberUtils {
         df.applyPattern("#,##0.##");
         dfPlain.applyPattern("0.##");
     }
+
     public static String formatWithCommas(long value) {
         return df.format(value);
     }
@@ -30,6 +31,7 @@ public class NumberUtils {
     public static String formatWithCommas(double value) {
         return df.format(value);
     }
+
     public static String format(double value) {
         return dfPlain.format(value);
     }

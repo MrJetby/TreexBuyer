@@ -67,7 +67,7 @@ public class BuyerGui extends ParsedGui {
 
         Consumer<InventoryCloseEvent> onClose = onClose();
         onClose(event -> {
-            if (onClose!=null)
+            if (onClose != null)
                 onClose.accept(event);
             sellSlots.forEach(slot -> {
                 ItemStack item = event.getInventory().getItem(slot);
@@ -113,7 +113,7 @@ public class BuyerGui extends ParsedGui {
 
     @Override
     public void buildItems(List<Item> items) {
-        if (plugin==null) {
+        if (plugin == null) {
             super.buildItems(items);
             return;
         }
@@ -135,6 +135,7 @@ public class BuyerGui extends ParsedGui {
 
         super.buildItems(expanded);
     }
+
     @Override
     public void clearInventory() {
         getWrappers().clear();
@@ -189,7 +190,7 @@ public class BuyerGui extends ParsedGui {
         return copy;
     }
 
-   private String substitutePrice(String line, double price, double priceWithCoeff, Material mat) {
+    private String substitutePrice(String line, double price, double priceWithCoeff, Material mat) {
         return line
                 .replace("%price%", NumberUtils.format(price))
                 .replace("%price_commas%", NumberUtils.formatWithCommas(price))

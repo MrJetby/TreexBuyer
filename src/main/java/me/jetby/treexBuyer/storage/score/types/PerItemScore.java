@@ -52,7 +52,8 @@ public class PerItemScore implements Score {
         element.getAsJsonObject().entrySet().forEach(e -> {
             try {
                 scores.put(Material.valueOf(e.getKey()), e.getValue().getAsDouble());
-            } catch (IllegalArgumentException ignored) {}
+            } catch (IllegalArgumentException ignored) {
+            }
         });
     }
 

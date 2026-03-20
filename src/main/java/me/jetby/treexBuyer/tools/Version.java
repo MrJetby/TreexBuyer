@@ -17,7 +17,7 @@ public class Version implements Listener {
 
     private final TreexBuyer plugin;
     private static final String VERSION_URL = "https://raw.githubusercontent.com/MrJetby/TreexBuyer/refs/heads/master/VERSION";
-    private static final String UPDATE_URL  = "https://raw.githubusercontent.com/MrJetby/TreexBuyer/refs/heads/master/UPDATE_LINK";
+    private static final String UPDATE_URL = "https://raw.githubusercontent.com/MrJetby/TreexBuyer/refs/heads/master/UPDATE_LINK";
 
     public Version(TreexBuyer plugin) {
         this.plugin = plugin;
