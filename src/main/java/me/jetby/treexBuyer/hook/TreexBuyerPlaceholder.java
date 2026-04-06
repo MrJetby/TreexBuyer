@@ -4,6 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.modules.UserData;
 import me.jetby.treexBuyer.tools.Logger;
+import me.jetby.treexBuyer.tools.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -56,25 +57,25 @@ public class TreexBuyerPlaceholder extends PlaceholderExpansion {
         if (args.equalsIgnoreCase("autobuy")) return String.valueOf(user.isAutoBuy());
 
         if (args.equalsIgnoreCase("score"))
-            return String.valueOf(user.getTotalScore());
+            return NumberUtils.format(user.getTotalScore());
 
         if (args.startsWith("score_item_")) {
             try {
                 Material mat = Material.valueOf(params.substring("score_item_".length()).toUpperCase());
-                return String.valueOf(user.getScore(mat));
+                return NumberUtils.format(user.getScore(mat));
             } catch (IllegalArgumentException e) {
                 return "invalid_material";
             }
         }
 
         if (args.startsWith("score_category_"))
-            return String.valueOf(plugin.getCoefficient().getTotalScoreByCategory(player, params.substring("score_category_".length())));
+            return NumberUtils.format(plugin.getCoefficient().getTotalScoreByCategory(player, params.substring("score_category_".length())));
 
         if (args.equalsIgnoreCase("coefficient"))
-            return String.valueOf(plugin.getCoefficient().getResult(player, null));
+            return NumberUtils.format(plugin.getCoefficient().getTotalCoefficient(player, user.getScore()));
 
         if (args.startsWith("coefficient_category_"))
-            return String.valueOf(plugin.getCoefficient().getTotalCoefficientByCategory(player, params.substring("coefficient_category_".length())));
+            return NumberUtils.format(plugin.getCoefficient().getTotalCoefficientByCategory(player, params.substring("coefficient_category_".length())));
 
         return null;
     }

@@ -4,6 +4,7 @@ import lombok.Getter;
 import me.jetby.treexBuyer.functions.Boost;
 import me.jetby.treexBuyer.storage.score.ScoreType;
 import me.jetby.treexBuyer.tools.FileLoader;
+import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -37,6 +38,8 @@ public class Config {
     public void load() {
         FileConfiguration cfg = FileLoader.getFileConfiguration("config.yml");
 
+        Logger.setDebug(cfg.getBoolean("debug", false));
+
         storageType = cfg.getString("storage.type", "yaml").toUpperCase();
         host = cfg.getString("storage.host");
         port = cfg.getInt("storage.port");
@@ -60,10 +63,10 @@ public class Config {
         boosters_except_legal_coefficient = ss.getBoolean("boosters_except_legal_coefficient", false);
 
         itemsPrices = cfg.getString("items-prices-file", "prices.yml");
-        loadBoosts(cfg);
+        loadBoosts(ss);
     }
 
-    public void loadBoosts(FileConfiguration cfg) {
+    public void loadBoosts(ConfigurationSection cfg) {
         boosts.clear();
         ConfigurationSection boosterSection = cfg.getConfigurationSection("booster");
         if (boosterSection == null) return;

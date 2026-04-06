@@ -1,3 +1,6 @@
+
+debug: false
+
 storage:
   # MYSQL, SQLITE, JSON
   type: "SQLITE"

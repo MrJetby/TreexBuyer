@@ -6,7 +6,7 @@
 
     <groupId>me.jetby</groupId>
     <artifactId>TreexBuyer</artifactId>
-    <version>4.0</version>
+    <version>4.1</version>
     <packaging>jar</packaging>
 
     <name>TreexBuyer</name>
@@ -104,7 +104,7 @@
         </repository>
         <repository>
             <id>jetby-repo</id>
-            <url>http://api.jetby.space/</url>
+            <url>https://api.jetby.space/</url> <!--if api.jetby.space not working, use https://api.jetby.org-->
         </repository>
     </repositories>
 
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>me.jetby</groupId>
             <artifactId>Libb</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

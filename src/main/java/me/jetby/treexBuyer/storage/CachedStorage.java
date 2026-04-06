@@ -5,8 +5,7 @@ import me.jetby.treexBuyer.modules.UserData;
 
 import java.util.UUID;
 
-public abstract class CachedStorage
-        implements Storage {
+public abstract class CachedStorage implements Storage {
     protected final TreexBuyer plugin;
 
     public CachedStorage(TreexBuyer plugin) {

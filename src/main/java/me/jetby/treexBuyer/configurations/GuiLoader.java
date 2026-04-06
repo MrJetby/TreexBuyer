@@ -1,16 +1,12 @@
 package me.jetby.treexBuyer.configurations;
 
-import me.jetby.libb.gui.CommandRegistrar;
 import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.menus.BuyerGui;
 import me.jetby.treexBuyer.modules.UserData;
 import me.jetby.treexBuyer.tools.Logger;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.HashMap;
@@ -48,6 +44,7 @@ public class GuiLoader {
     }
 
     public void loadGuis() {
+        ALL_GUIS.clear();
         File folder = new File(plugin.getDataFolder(), "Menu");
 
         Logger.success("------------------------");
@@ -88,30 +85,17 @@ public class GuiLoader {
 
             List<String> commands = config.getStringList("command");
             for (String cmd : commands) {
-                CommandRegistrar.registerCommand(plugin, cmd, new GuiExecutor(config));
+                plugin.registerCommand(plugin, cmd, (sender, command, label, args) -> {
+                    if (sender instanceof Player player) {
+                        UserData user = UserData.getOrCreate(player.getUniqueId(), plugin.getItems().createScore());
+                        new BuyerGui(player, user, config, plugin).open(player);
+                    }
+                    return true;
+                });
             }
             ALL_GUIS.put(menuId, config);
         } catch (Exception e) {
             Logger.error("Error trying to load menu: " + e.getMessage());
-        }
-    }
-
-
-    public class GuiExecutor implements CommandExecutor {
-
-        private final FileConfiguration guiConfig;
-
-        public GuiExecutor(FileConfiguration guiConfig) {
-            this.guiConfig = guiConfig;
-        }
-
-        @Override
-        public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.@NotNull Command command, @NotNull String label, @NotNull String[] args) {
-            if (sender instanceof Player player) {
-                UserData user = UserData.getOrCreate(player.getUniqueId(), plugin.getItems().createScore());
-                new BuyerGui(player, user, guiConfig, plugin).open(player);
-            }
-            return true;
         }
     }
 

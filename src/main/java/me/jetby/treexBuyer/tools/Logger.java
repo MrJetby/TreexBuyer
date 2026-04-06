@@ -4,8 +4,9 @@ import org.bukkit.Bukkit;
 
 public final class Logger {
 
-    private Logger() {
-        throw new UnsupportedOperationException("Utility class");
+    private static boolean DEBUG = false;
+    public static void setDebug(boolean status) {
+        Logger.DEBUG = status;
     }
 
     public static void warn(String message) {
@@ -25,6 +26,9 @@ public final class Logger {
     }
 
     public static void msg(String message) {
+        Bukkit.getConsoleSender().sendMessage("§6[TreexBuyer] §f" + message);
+    }
+    public static void debug(String message) {
         Bukkit.getConsoleSender().sendMessage("§6[TreexBuyer] §f" + message);
     }
 }

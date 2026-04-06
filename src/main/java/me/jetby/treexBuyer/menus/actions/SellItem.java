@@ -40,8 +40,8 @@ public class SellItem implements Action {
 
         player.getInventory().removeItem(new ItemStack(wrapper.itemStack().getType(), amount));
 
-        double score = TreexBuyer.getInstance().getCoefficient().getItemScore(wrapper.itemStack().getType()) * amount;
-        double price = TreexBuyer.getInstance().getCoefficient().getPrice(player, wrapper.itemStack().getType()) * amount;
+        double score = TreexBuyer.getInstance().getItems().getScoreAmount(wrapper.itemStack().getType()) * amount;
+        double price = TreexBuyer.getInstance().getCoefficient().getPriceWithCoefficient(player, wrapper.itemStack().getType()) * amount;
 
         UserData.findByUuid(player.getUniqueId()).addScore(wrapper.itemStack().getType(), score);
         TreexBuyer.getInstance().getEconomy().depositPlayer(player, price);

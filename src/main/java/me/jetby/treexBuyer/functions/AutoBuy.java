@@ -15,9 +15,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class AutoBuy {
 
     final TreexBuyer plugin;
@@ -62,7 +59,8 @@ public class AutoBuy {
             if (!plugin.getItems().getItemValues().containsKey(item.getType())) continue;
 
             Items.ItemData data = plugin.getItems().getItemValues().get(item.getType());
-            double price = data.price() * plugin.getCoefficient().getResult(player, user.getScore());
+            double pricePerItem = plugin.getCoefficient().getPriceWithCoefficient(player, item.getType());
+            double price = pricePerItem * item.getAmount();
             double score = data.score() * item.getAmount();
 
             var eq = player.getEquipment();
@@ -72,7 +70,7 @@ public class AutoBuy {
             if (item.isSimilar(eq.getLeggings())) eq.setLeggings(air);
             if (item.isSimilar(eq.getBoots())) eq.setBoots(air);
 
-            user.addScore(item.getType(), price * item.getAmount());
+            user.addScore(item.getType(), price);
             player.getInventory().removeItem(item);
             totalPrice += price * item.getAmount();
             if (score > 0) totalScores += score;
@@ -81,17 +79,12 @@ public class AutoBuy {
         if (totalPrice <= 0) return;
 
         plugin.getEconomy().depositPlayer(player, totalPrice);
-        ActionExecute.run(ActionContext.of(player), getStrings(totalPrice, totalScores));
-    }
-
-    private List<String> getStrings(double totalPrice, double totalScores) {
-        List<String> list = new ArrayList<>(plugin.getCfg().getAutoBuyActions());
-        list.replaceAll(s -> s
+        ActionExecute.run(ActionContext.of(player)
                 .replace("%sell_pay%", NumberUtils.format(totalPrice))
                 .replace("%sell_pay_commas%", NumberUtils.formatWithCommas(totalPrice))
                 .replace("%sell_score%", NumberUtils.format(totalScores))
-                .replace("%sell_score_commas%", NumberUtils.formatWithCommas(totalScores)));
-        return list;
+                .replace("%sell_score_commas%", NumberUtils.formatWithCommas(totalScores)),
+                plugin.getCfg().getAutoBuyActions());
     }
 
     public static boolean isRegularItem(@NotNull ItemStack item) {

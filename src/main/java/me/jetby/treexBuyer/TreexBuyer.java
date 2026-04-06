@@ -3,8 +3,9 @@ package me.jetby.treexBuyer;
 import lombok.Getter;
 import lombok.Setter;
 import me.jetby.libb.action.ActionRegistry;
-import me.jetby.libb.gui.CommandRegistrar;
-import me.jetby.treexBuyer.command.AdminCommand;
+import me.jetby.libb.plugin.LibbPlugin;
+import me.jetby.libb.util.Logger;
+import me.jetby.treexBuyer.command.BuyerCommand;
 import me.jetby.treexBuyer.configurations.Config;
 import me.jetby.treexBuyer.configurations.GuiLoader;
 import me.jetby.treexBuyer.configurations.Items;
@@ -16,24 +17,16 @@ import me.jetby.treexBuyer.menus.BuyerGui;
 import me.jetby.treexBuyer.menus.actions.*;
 import me.jetby.treexBuyer.modules.UserData;
 import me.jetby.treexBuyer.storage.*;
-import me.jetby.treexBuyer.tools.Logger;
-import me.jetby.treexBuyer.tools.Metrics;
-import me.jetby.treexBuyer.tools.Version;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
-public final class TreexBuyer extends JavaPlugin {
+public final class TreexBuyer extends LibbPlugin {
 
-    public static final NamespacedKey NAMESPACED_KEY = new NamespacedKey("treexbuyer", "item");
     private Economy economy;
-
     private static TreexBuyer INSTANCE;
 
     public static TreexBuyer getInstance() {
@@ -42,7 +35,6 @@ public final class TreexBuyer extends JavaPlugin {
 
     @Setter
     private Storage storage;
-
     private Config cfg;
     private Items items;
     private Coefficient coefficient;
@@ -50,54 +42,55 @@ public final class TreexBuyer extends JavaPlugin {
     @Getter
     @Setter
     private TreexBuyerPlaceholder treexBuyerPlaceholder;
-
+    private GuiLoader guiLoader;
     public static final MiniMessage MM = MiniMessage.miniMessage();
-
 
     @Override
     public void onEnable() {
         INSTANCE = this;
 
-        Logger.success("Looking for updates..");
-        Version version = new Version(this);
-        for (String str : version.getAlert()) {
-            Logger.success(str);
-        }
+        Logger.info(this, "Looking for updates..");
+        setVersionUtil("https://raw.githubusercontent.com/MrJetby/TreexBuyer/refs/heads/master/VERSION");
         this.economy = Vault.setupEconomy(this);
         if (economy == null) return;
-        Logger.success("Enabling TreexBuyer...");
-        new Metrics(this, 25141);
+
+        Logger.info(this, "<green>Enabling TreexBuyer...");
+
+        setBStats(this, 25141);
+
         cfg = new Config();
         cfg.load();
         items = new Items(this);
         items.load();
         registerActions();
-        new GuiLoader(this)
-                .loadGuis();
+        guiLoader = new GuiLoader(this);
+        guiLoader.loadGuis();
         loadStorage();
+
         autoBuy = new AutoBuy(this);
         autoBuy.start();
         coefficient = new Coefficient(this);
+
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
 
         new TreexBuyerPlaceholder(this).init();
 
-        PluginCommand treexbuyer = getCommand("treexbuyer");
-        if (treexbuyer != null)
-            treexbuyer.setExecutor(new AdminCommand(this));
-        Logger.success("");
-        Logger.success("Plugin was successfully enabled, enjoy it :)");
-        Logger.success("------------------------");
+        new BuyerCommand(this).register();
+
+        Logger.info(this, "");
+        Logger.info(this, "<green>Plugin was successfully enabled, enjoy it :)");
+        Logger.info(this, "------------------------");
     }
 
     @Override
     public void onDisable() {
-        CommandRegistrar.unregisterAll(this);
+        unregisterCommands();
+        ActionRegistry.unregisterAll("treexbuyer");
+
         if (autoBuy != null) {
             autoBuy.stop();
         }
         if (storage != null) storage.shutdown();
-        ActionRegistry.unregisterAll("treexbuyer");
     }
 
     public void loadStorage() {

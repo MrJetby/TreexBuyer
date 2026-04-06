@@ -1,12 +1,9 @@
 package me.jetby.treexBuyer.tools;
 
-import lombok.experimental.UtilityClass;
-
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
-@UtilityClass
 public class NumberUtils {
     private static final DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(Locale.US);
     private static final DecimalFormat dfPlain = (DecimalFormat) DecimalFormat.getInstance(Locale.US);

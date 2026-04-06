@@ -23,8 +23,8 @@ public class SellAll implements Action {
             ItemStack item = gui.getInventory().getItem(slot);
             if (item == null || !AutoBuy.isRegularItem(item)) return;
 
-            double score = TreexBuyer.getInstance().getCoefficient().getItemScore(item.getType()) * item.getAmount();
-            double price = TreexBuyer.getInstance().getCoefficient().getPrice(player, item.getType()) * item.getAmount();
+            double score = TreexBuyer.getInstance().getItems().getScoreAmount(item.getType()) * item.getAmount();
+            double price = TreexBuyer.getInstance().getCoefficient().getPriceWithCoefficient(player, item.getType()) * item.getAmount();
 
             if (score <= 0) return;
 

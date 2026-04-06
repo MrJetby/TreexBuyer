@@ -6,6 +6,7 @@ import me.jetby.libb.gui.parser.ParseUtil;
 import me.jetby.libb.gui.parser.ParsedGui;
 import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.modules.UserData;
+import me.jetby.treexBuyer.tools.Logger;
 import me.jetby.treexBuyer.tools.NumberUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -44,11 +45,7 @@ public class BuyerGui extends ParsedGui {
             if (!isGuiSlot && !isShiftFromPlayer) return;
 
             event.setCancelled(false);
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                recalcSellPay();
-                recalcSellScore();
-                refresh();
-            });
+            plugin.getServer().getScheduler().runTask(plugin, this::refresh);
         });
 
         onDrag(event -> {
@@ -57,11 +54,7 @@ public class BuyerGui extends ParsedGui {
             if (!affectsSellSlots) return;
 
             event.setCancelled(false);
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                recalcSellPay();
-                recalcSellScore();
-                refresh();
-            });
+            plugin.getServer().getScheduler().runTask(plugin, this::refresh);
         });
 
 
@@ -83,7 +76,7 @@ public class BuyerGui extends ParsedGui {
         for (int slot : sellSlots) {
             ItemStack item = inv.getItem(slot);
             if (item == null) continue;
-            total += plugin.getCoefficient().getPrice(player, item.getType()) * item.getAmount();
+            total += plugin.getCoefficient().getPriceWithCoefficient(player, item.getType()) * item.getAmount();
         }
         setReplace("%sell_pay%", NumberUtils.format(total));
         setReplace("%sell_pay_commas%", NumberUtils.formatWithCommas(total));
@@ -95,10 +88,11 @@ public class BuyerGui extends ParsedGui {
         for (int slot : sellSlots) {
             ItemStack item = inv.getItem(slot);
             if (item == null) continue;
-            total += plugin.getCoefficient().getItemScore(item.getType()) * item.getAmount();
+            total += plugin.getItems().getScoreAmount(item.getType()) * item.getAmount();
         }
         setReplace("%sell_score%", NumberUtils.format(total));
         setReplace("%sell_score_commas%", NumberUtils.formatWithCommas(total));
+        Logger.info(getPlaceholders().toString());
     }
 
     @Override
@@ -107,7 +101,7 @@ public class BuyerGui extends ParsedGui {
         recalcSellScore();
         setReplace("%score%", NumberUtils.format(user.getScore().getTotal()));
         setReplace("%score_commas%", NumberUtils.formatWithCommas(user.getScore().getTotal()));
-        setReplace("%coefficient%", NumberUtils.format(plugin.getCoefficient().getResult(player, user.getScore())));
+        setReplace("%coefficient%", NumberUtils.format(plugin.getCoefficient().getTotalCoefficient(player, user.getScore())));
         super.refresh();
     }
 
@@ -146,6 +140,7 @@ public class BuyerGui extends ParsedGui {
         }
     }
 
+
     private List<Item> expandCategoryItem(Item template, String category) {
         List<Material> materials = plugin.getItems().getMaterials(category);
         List<Integer> slots = template.slots();
@@ -155,8 +150,8 @@ public class BuyerGui extends ParsedGui {
             Material mat = materials.get(i);
             int slot = slots.get(i);
 
-            double price = plugin.getCoefficient().getPrice(player, mat);
-            double priceWithCoeff = price * plugin.getCoefficient().getResult(player, user.getScore());
+            double price = plugin.getItems().getOriginalPrice(mat);
+            double priceWithCoeff = plugin.getCoefficient().getPriceWithCoefficient(player, mat);
 
             Item copy = cloneWithMaterial(template, mat, slot, price, priceWithCoeff);
             result.add(copy);
