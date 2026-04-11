@@ -3,7 +3,6 @@ package me.jetby.treexBuyer.menus.actions;
 import me.jetby.libb.action.Action;
 import me.jetby.libb.action.ActionContext;
 import me.jetby.treexBuyer.TreexBuyer;
-import me.jetby.treexBuyer.functions.AutoBuy;
 import me.jetby.treexBuyer.menus.BuyerGui;
 import me.jetby.treexBuyer.modules.UserData;
 import org.bukkit.Bukkit;
@@ -21,7 +20,7 @@ public class SellAll implements Action {
 
         gui.getSellSlots().forEach(slot -> {
             ItemStack item = gui.getInventory().getItem(slot);
-            if (item == null || !AutoBuy.isRegularItem(item)) return;
+            if (item == null) return;
 
             double score = TreexBuyer.getInstance().getItems().getScoreAmount(item.getType()) * item.getAmount();
             double price = TreexBuyer.getInstance().getCoefficient().getPriceWithCoefficient(player, item.getType()) * item.getAmount();

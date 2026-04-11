@@ -25,6 +25,22 @@ autobuy:
     disable: "<#FB0000><bold>Disabled"
 
 
+#
+# This feature shows the item price under the description of each item
+# mechanic from the DonutSMP server
+#
+# Works only if you have the ProtocolLib plugin on your server
+#
+inventory-price:
+  enable: true
+  text: "<white>Price: $%price%"
+#
+# Shows the player the total value of their inventory in the action bar
+#
+persistent-actionbar:
+  enable: true
+  text: "<white>Inventory value: <green>$%sell_pay_commas%"
+
 score-system:
   # How the coefficient grows
   # GLOBAL - Same for all items

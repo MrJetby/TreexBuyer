@@ -1,10 +1,14 @@
 package me.jetby.treexBuyer.configurations;
 
 import lombok.Getter;
+import me.jetby.libb.Libb;
+import me.jetby.libb.action.record.ActionBlock;
+import me.jetby.libb.gui.parser.ParseUtil;
+import me.jetby.libb.plugin.LibbPlugin;
 import me.jetby.treexBuyer.functions.Boost;
 import me.jetby.treexBuyer.storage.score.ScoreType;
-import me.jetby.treexBuyer.tools.FileLoader;
 import me.jetby.treexBuyer.tools.Logger;
+import net.kyori.adventure.text.Component;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -31,29 +35,48 @@ public class Config {
     private String password;
     private String itemsPrices;
     private int autoBuyDelay;
-    private List<String> autoBuyActions;
+    private ActionBlock autoBuyActions;
     private List<String> disabledWorlds;
+
+    private boolean inventoryPrice;
+    private Component inventoryPriceText;
+
+    private boolean persistentActionbar;
+    private Component persistentActionbarText;
+
     private final Map<String, Boost> boosts = new HashMap<>();
+    private final FileConfiguration fileConfiguration;
+
+    public Config(LibbPlugin plugin) {
+        this.fileConfiguration = plugin.getFileConfiguration("config.yml");
+    }
 
     public void load() {
-        FileConfiguration cfg = FileLoader.getFileConfiguration("config.yml");
 
-        Logger.setDebug(cfg.getBoolean("debug", false));
+        Logger.setDebug(fileConfiguration.getBoolean("debug", false));
 
-        storageType = cfg.getString("storage.type", "yaml").toUpperCase();
-        host = cfg.getString("storage.host");
-        port = cfg.getInt("storage.port");
-        database = cfg.getString("storage.database");
-        username = cfg.getString("storage.username");
-        password = cfg.getString("storage.password");
-        autoBuyDelay = cfg.getInt("autobuy.delay", 60);
-        autoBuyActions = cfg.getStringList("autobuy.actions");
-        disabledWorlds = cfg.getStringList("autobuy.disabled-worlds");
-        enable = cfg.getString("autobuy.status.enable", "<green>Включён");
-        disable = cfg.getString("autobuy.status.disable", "<red>Выключен");
+        storageType = fileConfiguration.getString("storage.type", "yaml").toUpperCase();
+        host = fileConfiguration.getString("storage.host");
+        port = fileConfiguration.getInt("storage.port");
+        database = fileConfiguration.getString("storage.database");
+        username = fileConfiguration.getString("storage.username");
+        password = fileConfiguration.getString("storage.password");
+        autoBuyDelay = fileConfiguration.getInt("autobuy.delay", 60);
+        autoBuyActions = ParseUtil.getActionBlock(fileConfiguration, "autobuy.actions");
+        disabledWorlds = fileConfiguration.getStringList("autobuy.disabled-worlds");
+        enable = fileConfiguration.getString("autobuy.status.enable", "<green>Включён");
+        disable = fileConfiguration.getString("autobuy.status.disable", "<red>Выключен");
 
-        ConfigurationSection ss = cfg.getConfigurationSection("score-system");
-        if (ss == null) ss = cfg.createSection("score-system");
+
+        inventoryPrice = fileConfiguration.getBoolean("inventory-price.enable", false);
+        inventoryPriceText = Libb.MINI_MESSAGE.deserialize(fileConfiguration.getString("inventory-price.text", "<green>$%price%"));
+
+        persistentActionbar = fileConfiguration.getBoolean("persistent-actionbar.enable", false);
+        persistentActionbarText = Libb.MINI_MESSAGE.deserialize(fileConfiguration.getString("persistent-actionbar.text", ""));
+
+
+        ConfigurationSection ss = fileConfiguration.getConfigurationSection("score-system");
+        if (ss == null) ss = fileConfiguration.createSection("score-system");
 
         type = ScoreType.valueOf(ss.getString("type", "GLOBAL").toUpperCase());
         scores = ss.getInt("multiplier-ratio.scores", 100);
@@ -62,7 +85,7 @@ public class Config {
         defaultCoefficient = ss.getDouble("default-coefficient", 1);
         boosters_except_legal_coefficient = ss.getBoolean("boosters_except_legal_coefficient", false);
 
-        itemsPrices = cfg.getString("items-prices-file", "prices.yml");
+        itemsPrices = fileConfiguration.getString("items-prices-file", "prices.yml");
         loadBoosts(ss);
     }
 

@@ -24,6 +24,21 @@ autobuy:
     enable: "<#0DFB00><bold>Включён"
     disable: "<#FB0000><bold>Выключен"
 
+#
+# Эта функция показывает цену предмета под описанием каждого предмета
+# механика с сервера DonutSMP.
+#
+# Работает только если у вас на сервере есть плагин ProtocolLib
+#
+inventory-price:
+  enable: true
+  text: "<white>Цена: $%price%"
+#
+# Показывает игроку стоимость его инвентаря в actionbar
+#
+persistent-actionbar:
+  enable: true
+  text: "<white>Стоимость инвентаря: <green>$%sell_pay_commas%"
 
 score-system:
   # Как будет расти Коэффициент

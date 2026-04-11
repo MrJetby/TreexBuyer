@@ -7,9 +7,10 @@ authors: [ MrJetby ]
 website: https://jetby.org
 depend:
   - Libb
-softdepend:
-  - PlaceholderAPI
   - Vault
+  - PlaceholderAPI
+softdepend:
+  - ProtocolLib
 commands:
   treexbuyer:
     aliases:

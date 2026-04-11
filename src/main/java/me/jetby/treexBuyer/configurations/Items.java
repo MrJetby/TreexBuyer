@@ -1,9 +1,9 @@
 package me.jetby.treexBuyer.configurations;
 
 import lombok.Getter;
+import me.jetby.libb.plugin.LibbPlugin;
 import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.storage.score.Score;
-import me.jetby.treexBuyer.tools.FileLoader;
 import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -19,26 +19,26 @@ public class Items {
     private final TreexBuyer plugin;
     private final Map<Material, ItemData> itemValues = new LinkedHashMap<>();
     private final Map<Material, String> categories = new LinkedHashMap<>();
+    private final FileConfiguration fileConfiguration;
 
     public Items(TreexBuyer plugin) {
         this.plugin = plugin;
+        this.fileConfiguration = plugin.getFileConfiguration("prices.yml");
     }
-
     public void load() {
-        FileConfiguration config = FileLoader.getFileConfiguration("prices.yml");
 
         categories.clear();
         itemValues.clear();
 
-        ConfigurationSection categoriesSection = config.getConfigurationSection("categories");
+        ConfigurationSection categoriesSection = fileConfiguration.getConfigurationSection("categories");
         if (categoriesSection != null) {
             for (String category : categoriesSection.getKeys(false)) {
                 for (String name : categoriesSection.getStringList(category)) {
                     try {
                         Material material = Material.valueOf(name);
                         categories.put(material, category);
-                        double price = config.getDouble(material.name() + ".price", 0.0);
-                        double score = config.getDouble(material.name() + ".add-scores", 0);
+                        double price = fileConfiguration.getDouble(material.name() + ".price", 0.0);
+                        double score = fileConfiguration.getDouble(material.name() + ".add-scores", 0);
                         itemValues.put(material, new ItemData(price, score, category));
                     } catch (IllegalArgumentException e) {
                         Logger.error("Invalid material in category " + category + ": " + name);
@@ -47,13 +47,13 @@ public class Items {
             }
         }
 
-        for (String key : config.getKeys(false)) {
+        for (String key : fileConfiguration.getKeys(false)) {
             if (key.equals("categories")) continue;
             try {
                 Material material = Material.valueOf(key);
                 if (itemValues.containsKey(material)) continue;
-                double price = config.getDouble(key + ".price", 0.0);
-                double score = config.getDouble(key + ".add-scores", 0);
+                double price = fileConfiguration.getDouble(key + ".price", 0.0);
+                double score = fileConfiguration.getDouble(key + ".add-scores", 0);
                 itemValues.put(material, new ItemData(price, score, "none"));
             } catch (IllegalArgumentException e) {
                 Logger.error("Invalid material in prices.yml: " + key);

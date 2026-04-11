@@ -5,6 +5,7 @@ import me.jetby.libb.gui.parser.Item;
 import me.jetby.libb.gui.parser.ParseUtil;
 import me.jetby.libb.gui.parser.ParsedGui;
 import me.jetby.treexBuyer.TreexBuyer;
+import me.jetby.treexBuyer.functions.AutoBuy;
 import me.jetby.treexBuyer.modules.UserData;
 import me.jetby.treexBuyer.tools.Logger;
 import me.jetby.treexBuyer.tools.NumberUtils;
@@ -76,6 +77,7 @@ public class BuyerGui extends ParsedGui {
         for (int slot : sellSlots) {
             ItemStack item = inv.getItem(slot);
             if (item == null) continue;
+
             total += plugin.getCoefficient().getPriceWithCoefficient(player, item.getType()) * item.getAmount();
         }
         setReplace("%sell_pay%", NumberUtils.format(total));
@@ -88,11 +90,11 @@ public class BuyerGui extends ParsedGui {
         for (int slot : sellSlots) {
             ItemStack item = inv.getItem(slot);
             if (item == null) continue;
+
             total += plugin.getItems().getScoreAmount(item.getType()) * item.getAmount();
         }
         setReplace("%sell_score%", NumberUtils.format(total));
         setReplace("%sell_score_commas%", NumberUtils.formatWithCommas(total));
-        Logger.info(getPlaceholders().toString());
     }
 
     @Override

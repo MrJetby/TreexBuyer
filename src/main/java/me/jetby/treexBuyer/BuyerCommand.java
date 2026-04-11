@@ -1,4 +1,4 @@
-package me.jetby.treexBuyer.command;
+package me.jetby.treexBuyer;
 
 import me.jetby.libb.command.AdvancedCommand;
 import me.jetby.libb.command.annotations.Permission;
@@ -6,7 +6,6 @@ import me.jetby.libb.command.annotations.SubCommand;
 import me.jetby.libb.command.annotations.TabComplete;
 import me.jetby.libb.command.annotations.messages.InsufficientArgs;
 import me.jetby.libb.util.Logger;
-import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.configurations.Config;
 import me.jetby.treexBuyer.configurations.GuiLoader;
 import me.jetby.treexBuyer.menus.BuyerGui;
@@ -68,6 +67,14 @@ public class BuyerCommand extends AdvancedCommand {
         UserData user = UserData.getOrCreate(target.getUniqueId(), plugin.getItems().createScore());
         new BuyerGui(target, user, GuiLoader.ALL_GUIS.get(menuName), plugin).open(target);
     }
+    @SubCommand({"test"})
+    @Permission("treexbuyer.admin")
+    @InsufficientArgs("<#EF473A>Usage: /treexbuyer open <menu> [player]")
+    public void test(Player player) {
+        for (String str : player.getInventory().getItemInMainHand().getLore()) {
+            player.sendMessage(str);
+        }
+    }
 
     @TabComplete({"open"})
     public List<String> tabOpen(CommandSender sender, String[] args) {
@@ -88,6 +95,9 @@ public class BuyerCommand extends AdvancedCommand {
                 plugin.getStorage().shutdown();
                 plugin.getStorage().init();
                 plugin.getGuiLoader().loadGuis();
+                if (plugin.getInventoryPrice()!=null)
+                    plugin.getInventoryPrice().load();
+                plugin.getActionBarUtil().start();
             } catch (Exception ex) {
                 Logger.error(plugin, "Error with config reloading: " + ex);
                 sender.sendMessage(MM.deserialize("<#EF473A>Error: " + ex.getMessage()));

@@ -2,6 +2,7 @@ package me.jetby.treexBuyer.functions;
 
 import me.jetby.libb.action.ActionContext;
 import me.jetby.libb.action.ActionExecute;
+import me.jetby.libb.gui.parser.ParseUtil;
 import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.configurations.Items;
 import me.jetby.treexBuyer.modules.UserData;
@@ -72,14 +73,15 @@ public class AutoBuy {
 
             user.addScore(item.getType(), price);
             player.getInventory().removeItem(item);
-            totalPrice += price * item.getAmount();
+            totalPrice += price;
             if (score > 0) totalScores += score;
         }
 
         if (totalPrice <= 0) return;
 
         plugin.getEconomy().depositPlayer(player, totalPrice);
-        ActionExecute.run(ActionContext.of(player)
+
+        ActionExecute.run(ActionContext.of(player, plugin)
                 .replace("%sell_pay%", NumberUtils.format(totalPrice))
                 .replace("%sell_pay_commas%", NumberUtils.formatWithCommas(totalPrice))
                 .replace("%sell_score%", NumberUtils.format(totalScores))

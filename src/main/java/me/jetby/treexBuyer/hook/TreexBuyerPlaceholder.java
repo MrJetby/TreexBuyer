@@ -18,16 +18,6 @@ public class TreexBuyerPlaceholder extends PlaceholderExpansion {
         this.plugin = plugin;
     }
 
-    public void init() {
-        if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") == null) {
-            Logger.warn("PlaceholderAPI not found. Placeholders are not being working");
-            return;
-        } else {
-            plugin.setTreexBuyerPlaceholder(this);
-            plugin.getTreexBuyerPlaceholder().register();
-        }
-    }
-
     @NotNull
     @Override
     public String getIdentifier() {

@@ -1,9 +1,9 @@
 package me.jetby.treexBuyer.configurations;
 
+import me.jetby.libb.util.Logger;
 import me.jetby.treexBuyer.TreexBuyer;
 import me.jetby.treexBuyer.menus.BuyerGui;
 import me.jetby.treexBuyer.modules.UserData;
-import me.jetby.treexBuyer.tools.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -39,7 +39,6 @@ public class GuiLoader {
             String id = config.getString("id", file.getName().replace(".yml", ""));
 
             loadGui(id, file);
-            Logger.info(file.getPath() + " (id: " + id + ") loaded");
         }
     }
 
@@ -47,7 +46,6 @@ public class GuiLoader {
         ALL_GUIS.clear();
         File folder = new File(plugin.getDataFolder(), "Menu");
 
-        Logger.success("------------------------");
 
         if (!folder.exists() && folder.mkdirs()) {
             String[] defaults = {
@@ -63,21 +61,16 @@ public class GuiLoader {
 
                 if (!target.exists()) {
                     plugin.saveResource("Menu/" + name, false);
-                    Logger.info("The Menu/" + name + " created");
                 }
             }
         }
 
         loadFilesRecursive(folder);
-
-        Logger.success("------------------------");
-        Logger.success(ALL_GUIS.size() + " menus has been founded");
-        Logger.success("------------------------");
     }
 
     private void loadGui(String menuId, File file) {
         if (ALL_GUIS.containsKey(menuId)) {
-            Logger.error("A duplicate of " + menuId + " was found");
+            Logger.error(plugin, "A duplicate of " + menuId + " was found");
             return;
         }
         try {
@@ -95,7 +88,7 @@ public class GuiLoader {
             }
             ALL_GUIS.put(menuId, config);
         } catch (Exception e) {
-            Logger.error("Error trying to load menu: " + e.getMessage());
+            Logger.error(plugin, "Error trying to load menu: " + e.getMessage());
         }
     }
 
