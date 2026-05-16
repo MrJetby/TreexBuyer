@@ -21,7 +21,7 @@
 
 Found a bug or want to suggest an idea?
 - Create an [Issue on GitHub](https://github.com/MrJetby/TreexBuyer3/issues).
-- Or contact us on Discord: [TreexStudio](https://discord.gg/RcnDgRQVqY)
+- Or contact us on Discord: [JMD](https://dsc.gg/jmdev)
 
 Thank you for using **TreexBuyer**!
 
