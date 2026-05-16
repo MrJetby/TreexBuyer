@@ -1,4 +1,19 @@
 
+# Available serializers:
+# LEGACY_AMPERSAND  - "&c&lExample &c&9Text"
+# LEGACY_SECTION    - "§c§lExample §c§9Text"
+# MINI_MESSAGE      - "<bold><red>Example</red> <blue>Text</blue></bold>"
+# GSON              - "[{"text":"Example","bold":true,"color":"red"},{"text":" Text","color":"blue"}]"
+# PLAIN             - "Example Text"
+# MINIMAL           - &l#RGBExample <#RGB>Text</#RGB>
+# UNIFIED - Include all, except GSON
+serializer:
+  type: UNIFIED
+  cache:
+    enabled: true
+    max-size: 500
+
+
 debug: false
 
 storage:
