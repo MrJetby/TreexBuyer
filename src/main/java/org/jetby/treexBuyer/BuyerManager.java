@@ -3,6 +3,7 @@ package org.jetby.treexBuyer;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetby.libb.action.ActionRegistry;
+import org.jetby.libb.color.Serializer;
 import org.jetby.libb.util.Metrics;
 import org.jetby.libb.util.VersionUtil;
 import org.jetby.treexBuyer.configurations.Config;
@@ -16,9 +17,7 @@ import org.jetby.treexBuyer.hook.TreexBuyerPlaceholder;
 import org.jetby.treexBuyer.hook.Vault;
 import org.jetby.treexBuyer.menus.BuyerGui;
 import org.jetby.treexBuyer.menus.actions.*;
-import org.jetby.treexBuyer.menus.actions.*;
 import org.jetby.treexBuyer.modules.UserData;
-import org.jetby.treexBuyer.storage.*;
 import org.jetby.treexBuyer.storage.*;
 import org.jetby.treexBuyer.tools.Logger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -53,13 +52,13 @@ public final class BuyerManager {
     @Setter
     private TreexBuyerPlaceholder treexBuyerPlaceholder;
     private GuiLoader guiLoader;
-    public static final MiniMessage MM = MiniMessage.miniMessage();
     private PersistentActionBar actionBarUtil;
 
     private boolean isProtocol = false;
 
     public void onEnable() {
         MANAGER = this;
+
 
         Logger.info(plugin, "------------------------");
         new VersionUtil(plugin, plugin.getDescription().getVersion(), "https://raw.githubusercontent.com/MrJetby/TreexBuyer/refs/heads/master/VERSION", "treexbuyer.auto-update");

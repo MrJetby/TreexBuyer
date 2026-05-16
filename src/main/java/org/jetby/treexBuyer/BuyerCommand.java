@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.jetby.treexBuyer.BuyerManager.MM;
-
 public class BuyerCommand extends AdvancedCommand {
 
     private final BuyerManager manager;
@@ -44,12 +42,12 @@ public class BuyerCommand extends AdvancedCommand {
     @InsufficientArgs("<#EF473A>Usage: /treexbuyer open <menu> [player]")
     public void open(CommandSender sender, String menuName) {
         if (!GuiLoader.ALL_GUIS.containsKey(menuName)) {
-            sender.sendMessage(MM.deserialize("<#EF473A>Menu not found."));
+            sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Menu not found."));
             return;
         }
         Player target = sender instanceof Player p ? p : null;
         if (target == null) {
-            sender.sendMessage(MM.deserialize("<#EF473A>Specify a player for console."));
+            sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Specify a player for console."));
             return;
         }
         UserData user = UserData.getOrCreate(target.getUniqueId(), manager.getItems().createScore());
@@ -61,7 +59,7 @@ public class BuyerCommand extends AdvancedCommand {
     @InsufficientArgs("<#EF473A>Usage: /treexbuyer open <menu> [player]")
     public void openFor(CommandSender sender, String menuName, Player target) {
         if (!GuiLoader.ALL_GUIS.containsKey(menuName)) {
-            sender.sendMessage(MM.deserialize("<#EF473A>Menu not found."));
+            sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Menu not found."));
             return;
         }
         UserData user = UserData.getOrCreate(target.getUniqueId(), manager.getItems().createScore());
@@ -103,10 +101,10 @@ public class BuyerCommand extends AdvancedCommand {
                 }
             } catch (Exception ex) {
                 Logger.error(manager.getPlugin(), "Error with config reloading: " + ex);
-                sender.sendMessage(MM.deserialize("<#EF473A>Error: " + ex.getMessage()));
+                sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Error: " + ex.getMessage()));
                 return;
             }
-            sender.sendMessage(MM.deserialize("<#82FB16>Reloaded in " + (System.currentTimeMillis() - start) + "ms."));
+            sender.sendMessage(Config.SERIALIZER.deserialize("<#82FB16>Reloaded in " + (System.currentTimeMillis() - start) + "ms."));
         });
     }
 
@@ -175,7 +173,7 @@ public class BuyerCommand extends AdvancedCommand {
                 amount = Double.parseDouble(key);
                 if (amount < 0) throw new NumberFormatException();
             } catch (NumberFormatException e) {
-                sender.sendMessage(MM.deserialize("<#EF473A>Amount must be a non-negative number."));
+                sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Amount must be a non-negative number."));
                 return;
             }
         } else {
@@ -184,7 +182,7 @@ public class BuyerCommand extends AdvancedCommand {
             key = key.toLowerCase();
 
             if (args.length < 2) {
-                sender.sendMessage(MM.deserialize("<#EF473A>Usage: /treexbuyer score " + action + " <player> <key> <amount>"));
+                sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Usage: /treexbuyer score " + action + " <player> <key> <amount>"));
                 return;
             }
 
@@ -192,7 +190,7 @@ public class BuyerCommand extends AdvancedCommand {
                 amount = Double.parseDouble(args[1]);
                 if (amount < 0) throw new NumberFormatException();
             } catch (NumberFormatException e) {
-                sender.sendMessage(MM.deserialize("<#EF473A>Amount must be a non-negative number."));
+                sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Amount must be a non-negative number."));
                 return;
             }
 
@@ -200,11 +198,11 @@ public class BuyerCommand extends AdvancedCommand {
                 try {
                     Material.valueOf(key.toUpperCase());
                 } catch (IllegalArgumentException e) {
-                    sender.sendMessage(MM.deserialize("<#EF473A>Invalid material: " + key));
+                    sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Invalid material: " + key));
                     return;
                 }
             } else if (scoreType == ScoreType.CATEGORY && !manager.getItems().getCategories().containsValue(key)) {
-                sender.sendMessage(MM.deserialize("<#EF473A>Invalid category key: " + key));
+                sender.sendMessage(Config.SERIALIZER.deserialize("<#EF473A>Invalid category key: " + key));
                 return;
             }
         }
@@ -232,6 +230,6 @@ public class BuyerCommand extends AdvancedCommand {
             }
         }
 
-        sender.sendMessage(MM.deserialize("<#82FB16>Successfully " + action + "d " + finalAmount + " score for " + playerName));
+        sender.sendMessage(Config.SERIALIZER.deserialize("<#82FB16>Successfully " + action + "d " + finalAmount + " score for " + playerName));
     }
 }

@@ -4,7 +4,9 @@ import lombok.Getter;
 import org.jetby.libb.gui.parser.Item;
 import org.jetby.libb.gui.parser.ParseUtil;
 import org.jetby.libb.gui.parser.ParsedGui;
+import org.jetby.libb.gui.parser.ParserContext;
 import org.jetby.treexBuyer.BuyerManager;
+import org.jetby.treexBuyer.configurations.Config;
 import org.jetby.treexBuyer.modules.UserData;
 import org.jetby.treexBuyer.tools.NumberUtils;
 import org.bukkit.Material;
@@ -28,7 +30,7 @@ public class BuyerGui extends ParsedGui {
     private final UserData user;
 
     public BuyerGui(@NotNull Player viewer, UserData user, @NotNull FileConfiguration config, BuyerManager manager) {
-        super(viewer, config, manager.getPlugin());
+        super(viewer, config, manager.getPlugin(), ParserContext.of(Config.SERIALIZER));
         this.user = user;
         this.manager = manager;
         this.sellSlots = ParseUtil.parseSlots(config.getStringList("sell-slots"));

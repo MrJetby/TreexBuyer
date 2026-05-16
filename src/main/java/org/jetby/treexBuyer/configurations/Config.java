@@ -3,6 +3,9 @@ package org.jetby.treexBuyer.configurations;
 import lombok.Getter;
 import org.jetby.libb.LibbApi;
 import org.jetby.libb.action.record.ActionBlock;
+import org.jetby.libb.color.HashedSerializer;
+import org.jetby.libb.color.Serializer;
+import org.jetby.libb.color.SerializerType;
 import org.jetby.libb.gui.parser.ParseUtil;
 import org.jetby.treexBuyer.BuyerManager;
 import org.jetby.treexBuyer.functions.Boost;
@@ -44,7 +47,8 @@ public class Config {
     private Component persistentActionbarText;
 
     private final Map<String, Boost> boosts = new HashMap<>();
-    private FileConfiguration fileConfiguration;
+    private FileConfiguration config;
+    public static Serializer SERIALIZER;
 
 
     private final BuyerManager manager;
@@ -53,32 +57,38 @@ public class Config {
     }
 
     public void load() {
-        this.fileConfiguration = manager.getPlugin().getFileConfiguration("config.yml");
+        this.config = manager.getPlugin().getFileConfiguration("config.yml");
 
 //        Logger.setDebug(fileConfiguration.getBoolean("debug", false));
 
-        storageType = fileConfiguration.getString("storage.type", "yaml").toUpperCase();
-        host = fileConfiguration.getString("storage.host");
-        port = fileConfiguration.getInt("storage.port");
-        database = fileConfiguration.getString("storage.database");
-        username = fileConfiguration.getString("storage.username");
-        password = fileConfiguration.getString("storage.password");
-        autoBuyDelay = fileConfiguration.getInt("autobuy.delay", 60);
-        autoBuyActions = ParseUtil.getActionBlock(fileConfiguration, "autobuy.actions");
-        disabledWorlds = fileConfiguration.getStringList("autobuy.disabled-worlds");
-        enable = fileConfiguration.getString("autobuy.status.enable", "<green>Включён");
-        disable = fileConfiguration.getString("autobuy.status.disable", "<red>Выключен");
+
+        SERIALIZER = new HashedSerializer(
+                SerializerType.valueOf(config.getString("serializer.type")),
+                config.getBoolean("serializer.cache.enabled"),
+                config.getInt("serializer.cache.max-size"));
+
+        storageType = config.getString("storage.type", "yaml").toUpperCase();
+        host = config.getString("storage.host");
+        port = config.getInt("storage.port");
+        database = config.getString("storage.database");
+        username = config.getString("storage.username");
+        password = config.getString("storage.password");
+        autoBuyDelay = config.getInt("autobuy.delay", 60);
+        autoBuyActions = ParseUtil.getActionBlock(config, "autobuy.actions");
+        disabledWorlds = config.getStringList("autobuy.disabled-worlds");
+        enable = config.getString("autobuy.status.enable", "<green>Включён");
+        disable = config.getString("autobuy.status.disable", "<red>Выключен");
 
 
-        inventoryPrice = fileConfiguration.getBoolean("inventory-price.enable", false);
-        inventoryPriceText = LibbApi.Settings.CONFIG_COLORIZER.deserialize(fileConfiguration.getString("inventory-price.text", "<green>$%price%"));
+        inventoryPrice = config.getBoolean("inventory-price.enable", false);
+        inventoryPriceText = LibbApi.Settings.CONFIG_COLORIZER.deserialize(config.getString("inventory-price.text", "<green>$%price%"));
 
-        persistentActionbar = fileConfiguration.getBoolean("persistent-actionbar.enable", false);
-        persistentActionbarText = LibbApi.Settings.CONFIG_COLORIZER.deserialize(fileConfiguration.getString("persistent-actionbar.text", ""));
+        persistentActionbar = config.getBoolean("persistent-actionbar.enable", false);
+        persistentActionbarText = LibbApi.Settings.CONFIG_COLORIZER.deserialize(config.getString("persistent-actionbar.text", ""));
 
 
-        ConfigurationSection ss = fileConfiguration.getConfigurationSection("score-system");
-        if (ss == null) ss = fileConfiguration.createSection("score-system");
+        ConfigurationSection ss = config.getConfigurationSection("score-system");
+        if (ss == null) ss = config.createSection("score-system");
 
         type = ScoreType.valueOf(ss.getString("type", "GLOBAL").toUpperCase());
         scores = ss.getInt("multiplier-ratio.scores", 100);
@@ -87,7 +97,7 @@ public class Config {
         defaultCoefficient = ss.getDouble("default-coefficient", 1);
         boosters_except_legal_coefficient = ss.getBoolean("boosters_except_legal_coefficient", false);
 
-        itemsPrices = fileConfiguration.getString("items-prices-file", "prices.yml");
+        itemsPrices = config.getString("items-prices-file", "prices.yml");
         loadBoosts(ss);
     }
 

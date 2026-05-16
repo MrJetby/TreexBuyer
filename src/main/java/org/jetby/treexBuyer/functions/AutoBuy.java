@@ -32,7 +32,7 @@ public class AutoBuy {
                 if (manager.getItems().getItemValues().isEmpty()) break;
                 UserData user = UserData.findByUuid(player.getUniqueId());
                 if (user == null || !user.isAutoBuy() || player.getInventory().getContents().length == 0) continue;
-                checkItems(player);
+                Bukkit.getScheduler().runTask(manager.getPlugin(), () -> checkItems(player));
             }
         }, 0L, manager.getCfg().getAutoBuyDelay());
     }
