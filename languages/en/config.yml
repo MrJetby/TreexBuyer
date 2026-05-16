@@ -33,7 +33,7 @@ autobuy:
 #
 inventory-price:
   enable: true
-  text: "<white>Price: $%price%"
+  text: "<!i><white>Price: <green>$%price%"
 #
 # Shows the player the total value of their inventory in the action bar
 #

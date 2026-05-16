@@ -1,16 +1,16 @@
 name: TreexBuyer
 version: ${project.version}
-main: me.jetby.treexBuyer.TreexBuyer
+main: org.jetby.treexBuyer.TreexBuyer
 api-version: '1.20'
 load: POSTWORLD
 authors: [ MrJetby ]
 website: https://jetby.org
 depend:
-  - Libb
   - Vault
   - PlaceholderAPI
 softdepend:
   - ProtocolLib
+  - Libb
 commands:
   treexbuyer:
     aliases:
